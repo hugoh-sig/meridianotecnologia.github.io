@@ -400,15 +400,105 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
   .hero h1{font-size:2.6rem;}
   .projetos-grid{grid-template-columns:1fr;}
 }
+
+/* cursor padrão mantido */
+
+/* ── MERIDIANO — efeito de digitação ── */
+.meridiano-txt { display: inline-block; }
+.meridiano-cursor {
+  display: inline-block; width: 2px; height: .85em;
+  background: var(--acento); margin-left: 2px;
+  animation: blink .7s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+/* ── CONTADORES ANIMADOS ── */
+.numero-val { transition: none; }
+
+/* ── CARDS — efeito tilt 3D suave ── */
+.case-card, .srv-card {
+  transform-style: preserve-3d;
+  transition: transform .4s ease, box-shadow .4s ease;
+  will-change: transform;
+}
+
+/* ── LINHA SEPARADORA ANIMADA ── */
+.sep-line {
+  height: 1px; background: linear-gradient(to right, transparent, var(--borda), transparent);
+  margin: 0 auto; max-width: 800px;
+  transform: scaleX(0); transform-origin: center;
+  transition: transform .8s ease;
+}
+.sep-line.visible { transform: scaleX(1); }
+
+/* ── HERO — partículas de coordenadas ── */
+.coord-badge {
+  position: absolute; font-size: .65rem; font-family: monospace;
+  color: rgba(126,200,168,.25); letter-spacing: .05em;
+  animation: fadeFloat 8s ease infinite;
+  pointer-events: none;
+}
+@keyframes fadeFloat {
+  0%,100%{opacity:0;transform:translateY(0);}
+  20%,80%{opacity:1;}
+  50%{transform:translateY(-12px);}
+}
+
+/* ── REVEAL — variações de direção ── */
+.reveal-left { opacity:0; transform:translateX(-30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal-right { opacity:0; transform:translateX(30px); transition:opacity .7s ease,transform .7s ease; }
+.reveal-left.visible, .reveal-right.visible { opacity:1; transform:none; }
+
+/* ── NAVEGAÇÃO — indicador ativo ── */
+.nav-links a { position: relative; }
+.nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0; right:0;
+  height:1.5px; background:var(--acento);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .25s ease;
+}
+.nav-links a:hover::after { transform:scaleX(1); }
+
+/* ── SCROLL PROGRESS BAR ── */
+#scroll-bar {
+  position:fixed; top:0; left:0; height:2px; z-index:300;
+  background:var(--acento); width:0%; transition:width .1s linear;
+}
+
+/* ── SEÇÃO TECNOLOGIAS ── */
+.tech-secao { padding: 3rem 2rem; background: var(--off); overflow: hidden; }
+.tech-titulo { text-align:center; font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--suave); margin-bottom:2rem; }
+.tech-faixa { display:flex; gap:2.5rem; align-items:center; animation:slide 20s linear infinite; white-space:nowrap; }
+.tech-faixa-wrap { display:flex; overflow:hidden; }
+@keyframes slide { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.tech-item {
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.85rem; font-weight:500; color:var(--suave);
+  white-space:nowrap; flex-shrink:0;
+}
+.tech-dot { width:6px; height:6px; border-radius:50%; background:var(--borda); flex-shrink:0; }
+
+/* ── FOOTER APRIMORADO ── */
+.footer-inner {
+  max-width:1100px; margin:0 auto;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:1rem;
+}
+.footer-links { display:flex; gap:1.5rem; list-style:none; }
+.footer-links a { font-size:.8rem; color:rgba(255,255,255,.3); text-decoration:none; transition:color .2s; }
+.footer-links a:hover { color:rgba(255,255,255,.7); }
+
 </style>
 </head>
 <body>
+<div id="scroll-bar"></div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-logo">
     <img src="mdt_logo_branco.png" alt="MDT" onerror="this.style.display='none'">
-    <span class="nav-logo-txt">Meridiano Tecnologia</span>
+    <span class="nav-logo-txt"><span class="meridiano-txt" id="nav-meridiano"></span><span class="meridiano-cursor"></span></span>
   </div>
   <ul class="nav-links">
     <li><a href="#projetos">Projetos</a></li>
@@ -422,6 +512,11 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
 <!-- HERO -->
 <section class="hero">
   <canvas id="hero-canvas"></canvas>
+  <div class="coord-badge" style="top:20%;left:8%;animation-delay:0s">19°55'S 43°56'W</div>
+  <div class="coord-badge" style="top:35%;right:10%;animation-delay:2s">NDVI: 0.847</div>
+  <div class="coord-badge" style="top:65%;left:12%;animation-delay:4s">PostGIS 3.4</div>
+  <div class="coord-badge" style="top:75%;right:8%;animation-delay:1s">Landsat-9 OLI</div>
+  <div class="coord-badge" style="top:50%;left:5%;animation-delay:3s">IPFS/Web3</div>
 
   <div class="hero-eyebrow">
     <span></span>
@@ -624,7 +719,7 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
         <div class="app-feat">Relatórios de bem-estar por período</div>
       </div>
       <div class="app-badges reveal">
-        <a href="https://expo.dev/accounts/hhcs13/projects/meudia/builds/9ab1fb2e-6957-475c-bbd9-4eac34f52c97" target="_blank" class="badge badge-ativo">
+        <a href="https://expo.dev/accounts/hhcs13/projects/meudia/builds/0cb4bb1e-be8f-45b6-a71d-3acb69f0a5fb" target="_blank" class="badge badge-ativo">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.35.19.74.24 1.12.14l12.53-7.18-2.61-2.62-11.04 9.66zM20.7 10.67L17.77 9 14.97 11.8l2.8 2.8 2.95-1.69c.84-.48.84-1.76-.02-2.24zM1.05.87C.8 1.16.66 1.6.66 2.16v19.67c0 .56.14 1 .4 1.29l.07.06 11.02-11.02v-.26L1.12.81l-.07.06zM14.97 12.2L3.3.53l-.12-.11 12.53 7.18-2.8 2.8 2.06 1.8z"/></svg>
           Baixar para Android
         </a>
@@ -687,7 +782,7 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
 <section class="secao" id="processo">
   <div class="centro">
     <p class="sec-label reveal">Como trabalhamos</p>
-    <h2 class="sec-titulo reveal">Do briefing à entrega,<br>com você em cada etapa</h2>
+    <h2 class="sec-titulo reveal">Do levantamento à entrega,<br>com você em cada etapa</h2>
   </div>
   <div class="processo-grid">
     <div class="proc-item reveal">
@@ -749,6 +844,10 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
           </div>
         </div>
       </div>
+      <div class="reveal" style="margin-top:2rem;display:flex;align-items:center;gap:1rem;padding-top:1.5rem;border-top:1px solid var(--borda);">
+        <img src="mdt_logo_meridiano_tecnologia.png" alt="Meridiano Tecnologia" style="height:36px;opacity:.7;">
+        <span style="font-size:.82rem;color:var(--suave);">Belo Horizonte, MG · desde 2026</span>
+      </div>
     </div>
   </div>
 </section>
@@ -772,13 +871,145 @@ footer p{font-size:.8rem;color:rgba(255,255,255,.3);}
   </div>
 </section>
 
+
+<!-- TECNOLOGIAS -->
+<div class="tech-secao">
+  <p class="tech-titulo">Tecnologias que dominamos</p>
+  <div class="tech-faixa-wrap">
+    <div class="tech-faixa" id="tech-faixa">
+      <div class="tech-item"><div class="tech-dot"></div>Google Earth Engine</div>
+      <div class="tech-item"><div class="tech-dot"></div>React Native</div>
+      <div class="tech-item"><div class="tech-dot"></div>PostGIS</div>
+      <div class="tech-item"><div class="tech-dot"></div>IPFS / Web3</div>
+      <div class="tech-item"><div class="tech-dot"></div>Supabase</div>
+      <div class="tech-item"><div class="tech-dot"></div>Leaflet</div>
+      <div class="tech-item"><div class="tech-dot"></div>MapBiomas</div>
+      <div class="tech-item"><div class="tech-dot"></div>Landsat 8 & 9</div>
+      <div class="tech-item"><div class="tech-dot"></div>Python / GeoPandas</div>
+      <div class="tech-item"><div class="tech-dot"></div>TypeScript</div>
+      <div class="tech-item"><div class="tech-dot"></div>AES-256</div>
+      <div class="tech-item"><div class="tech-dot"></div>GeoServer</div>
+      <div class="tech-item"><div class="tech-dot"></div>QGIS</div>
+      <div class="tech-item"><div class="tech-dot"></div>Expo EAS</div>
+      <!-- duplicar para loop infinito -->
+      <div class="tech-item"><div class="tech-dot"></div>Google Earth Engine</div>
+      <div class="tech-item"><div class="tech-dot"></div>React Native</div>
+      <div class="tech-item"><div class="tech-dot"></div>PostGIS</div>
+      <div class="tech-item"><div class="tech-dot"></div>IPFS / Web3</div>
+      <div class="tech-item"><div class="tech-dot"></div>Supabase</div>
+      <div class="tech-item"><div class="tech-dot"></div>Leaflet</div>
+      <div class="tech-item"><div class="tech-dot"></div>MapBiomas</div>
+      <div class="tech-item"><div class="tech-dot"></div>Landsat 8 & 9</div>
+      <div class="tech-item"><div class="tech-dot"></div>Python / GeoPandas</div>
+      <div class="tech-item"><div class="tech-dot"></div>TypeScript</div>
+      <div class="tech-item"><div class="tech-dot"></div>AES-256</div>
+      <div class="tech-item"><div class="tech-dot"></div>GeoServer</div>
+      <div class="tech-item"><div class="tech-dot"></div>QGIS</div>
+      <div class="tech-item"><div class="tech-dot"></div>Expo EAS</div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
-  <img src="mdt_logo_branco.png" alt="MDT" onerror="this.style.display='none'">
-  <p>© 2026 Meridiano Tecnologia · Belo Horizonte, MG · Todos os direitos reservados</p>
+  <div class="footer-inner">
+    <div>
+      <img src="mdt_logo_branco.png" alt="MDT" onerror="this.style.display='none'" style="height:24px;filter:brightness(0) invert(1);opacity:.4;margin-bottom:.5rem;display:block;">
+      <p style="font-size:.78rem;color:rgba(255,255,255,.25);">© 2026 Meridiano Tecnologia · Belo Horizonte, MG</p>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#projetos">Projetos</a></li>
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#app">Meu Dia com MDT</a></li>
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+  </div>
 </footer>
 
 <script>
+
+// ── SCROLL PROGRESS BAR ──
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('scroll-bar').style.width = pct + '%';
+});
+
+// ── EFEITO DIGITAÇÃO — Meridiano ──
+const palavras = ['Meridiano Tecnologia', 'Soluções sob medida', 'Do dado à decisão'];
+let wi = 0, ci = 0, apagando = false;
+const el = document.getElementById('nav-meridiano');
+if (el) {
+  function digitar() {
+    const atual = palavras[wi];
+    if (!apagando) {
+      el.textContent = atual.slice(0, ++ci);
+      if (ci === atual.length) { apagando = true; setTimeout(digitar, 2200); return; }
+      setTimeout(digitar, 65);
+    } else {
+      el.textContent = atual.slice(0, --ci);
+      if (ci === 0) { apagando = false; wi = (wi + 1) % palavras.length; setTimeout(digitar, 400); return; }
+      setTimeout(digitar, 35);
+    }
+  }
+  setTimeout(digitar, 1000);
+}
+
+// ── CONTADORES ANIMADOS ──
+function animCount(el, target, suffix='') {
+  let start = 0;
+  const dur = 1800;
+  const step = timestamp => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(ease * target) + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+const countObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    const txt = el.textContent;
+    const num = parseInt(txt);
+    const suffix = txt.replace(String(num), '');
+    animCount(el, num, suffix);
+    countObs.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.numero-val').forEach(el => countObs.observe(el));
+
+// ── TILT 3D NOS CARDS ──
+document.querySelectorAll('.case-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(800px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg) translateY(-6px)`;
+    card.style.boxShadow = `${-x * 12}px ${-y * 8}px 40px rgba(27,77,62,.15)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.boxShadow = '';
+  });
+});
+
+// ── HIGHLIGHT SEÇÃO ATIVA NA NAV ──
+const sections = document.querySelectorAll('section[id], div[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const secObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.style.color = '');
+      const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (active) active.style.color = 'white';
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => secObs.observe(s));
+
 // ── Reveal on scroll ──
 const obs = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
