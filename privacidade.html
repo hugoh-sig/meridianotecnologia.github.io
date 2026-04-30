@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Meu Dia com MDT</title>
+<meta name="description" content="Política de privacidade do aplicativo Meu Dia com MDT, desenvolvido pela Meridiano Tecnologia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde:       #1B4D3E;
+  --verde-esc:   #0d2b22;
+  --acento:      #7ec8a8;
+  --texto:       #111816;
+  --suave:       #5a6b65;
+  --borda:       #e5e9e7;
+  --bg:          #f8faf9;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; color:var(--texto); background:var(--bg); line-height:1.75; }
+
+/* NAV */
+nav {
+  background:var(--verde-esc);
+  padding:1.1rem 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.nav-logo { display:flex; align-items:center; gap:.75rem; text-decoration:none; }
+.nav-logo img { height:28px; filter:brightness(0) invert(1); opacity:.9; }
+.nav-logo span { font-family:'Syne',sans-serif; font-size:.95rem; font-weight:700; color:#fff; }
+.nav-back {
+  font-size:.82rem; color:rgba(255,255,255,.55); text-decoration:none;
+  display:flex; align-items:center; gap:.4rem;
+  transition:color .2s;
+}
+.nav-back:hover { color:#fff; }
+
+/* HERO */
+.hero {
+  background:var(--verde);
+  padding:4rem 2rem 3rem;
+  text-align:center;
+}
+.hero-label {
+  display:inline-block;
+  font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--acento); margin-bottom:1rem;
+}
+.hero h1 {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  font-weight:700; color:#fff; line-height:1.15;
+  margin-bottom:.75rem;
+}
+.hero-sub { font-size:.95rem; color:rgba(255,255,255,.55); max-width:480px; margin:0 auto; }
+.hero-data {
+  display:inline-flex; align-items:center; gap:.5rem;
+  margin-top:1.5rem;
+  font-size:.78rem; color:rgba(255,255,255,.35);
+  border:1px solid rgba(255,255,255,.1);
+  padding:.35rem .9rem; border-radius:100px;
+}
+
+/* CONTEÚDO */
+.container {
+  max-width:780px; margin:0 auto;
+  padding:3.5rem 2rem 5rem;
+}
+
+/* ÍNDICE */
+.indice {
+  background:#fff; border:1px solid var(--borda);
+  border-radius:16px; padding:1.5rem 2rem;
+  margin-bottom:3rem;
+}
+.indice-titulo {
+  font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--suave); margin-bottom:1rem;
+}
+.indice ol { padding-left:1.25rem; display:flex; flex-direction:column; gap:.35rem; }
+.indice a {
+  font-size:.9rem; color:var(--verde); text-decoration:none;
+  transition:color .2s;
+}
+.indice a:hover { color:var(--acento); }
+
+/* SEÇÕES */
+.secao { margin-bottom:3rem; }
+.secao-num {
+  font-family:'Syne',sans-serif;
+  font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--acento); margin-bottom:.4rem;
+}
+.secao h2 {
+  font-family:'Syne',sans-serif;
+  font-size:1.35rem; font-weight:700; color:var(--verde);
+  margin-bottom:1rem; padding-bottom:.75rem;
+  border-bottom:2px solid var(--borda);
+}
+.secao p { font-size:.95rem; color:#2a3530; margin-bottom:.85rem; }
+.secao p:last-child { margin-bottom:0; }
+
+/* DESTAQUE */
+.destaque {
+  background:#fff; border:1px solid var(--borda);
+  border-left:4px solid var(--acento);
+  border-radius:0 12px 12px 0;
+  padding:1.1rem 1.5rem; margin:1.25rem 0;
+}
+.destaque p { margin:0; font-size:.9rem; }
+
+/* LISTA */
+.lista { padding-left:1.25rem; margin:.75rem 0; display:flex; flex-direction:column; gap:.4rem; }
+.lista li { font-size:.92rem; color:#2a3530; }
+.lista li::marker { color:var(--acento); }
+
+/* TAG */
+.tag {
+  display:inline-block;
+  background:rgba(27,77,62,.08); color:var(--verde);
+  font-size:.75rem; font-weight:600; letter-spacing:.04em;
+  padding:.2rem .65rem; border-radius:100px;
+  margin:.15rem;
+}
+
+/* CONTATO BOX */
+.contato-box {
+  background:var(--verde); border-radius:20px;
+  padding:2rem; margin-top:3rem; text-align:center;
+}
+.contato-box h3 {
+  font-family:'Syne',sans-serif;
+  font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:.5rem;
+}
+.contato-box p { font-size:.88rem; color:rgba(255,255,255,.6); margin-bottom:1.25rem; }
+.contato-links { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; }
+.contato-link {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.55rem 1.25rem; border-radius:100px;
+  border:1.5px solid rgba(255,255,255,.2); color:#fff;
+  font-size:.85rem; font-weight:500; text-decoration:none;
+  transition:border-color .2s, background .2s;
+}
+.contato-link:hover { border-color:var(--acento); background:rgba(126,200,168,.1); }
+
+/* FOOTER */
+footer {
+  background:var(--verde-esc);
+  padding:1.5rem 2rem; text-align:center;
+}
+footer p { font-size:.78rem; color:rgba(255,255,255,.25); }
+footer a { color:rgba(255,255,255,.4); text-decoration:none; }
+footer a:hover { color:rgba(255,255,255,.7); }
+
+/* DIVISOR */
+hr { border:none; border-top:1px solid var(--borda); margin:2.5rem 0; }
+
+@media(max-width:600px) {
+  nav { padding:.9rem 1.25rem; }
+  .hero { padding:3rem 1.25rem 2.5rem; }
+  .container { padding:2.5rem 1.25rem 4rem; }
+  .indice { padding:1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="mdt_logo_branco.png" alt="MDT" onerror="this.style.display='none'">
+    <span>Meridiano Tecnologia</span>
+  </a>
+  <a href="/" class="nav-back">
+    ← Voltar ao site
+  </a>
+</nav>
+
+<div class="hero">
+  <p class="hero-label">Documento legal</p>
+  <h1>Política de Privacidade</h1>
+  <p class="hero-sub">Aplicativo Meu Dia com MDT — desenvolvido pela Meridiano Tecnologia</p>
+  <div class="hero-data">Última atualização: 30 de abril de 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- ÍNDICE -->
+  <div class="indice">
+    <p class="indice-titulo">Índice</p>
+    <ol>
+      <li><a href="#s1">Quem somos</a></li>
+      <li><a href="#s2">Quais dados coletamos</a></li>
+      <li><a href="#s3">Como os dados são armazenados</a></li>
+      <li><a href="#s4">Com quem compartilhamos</a></li>
+      <li><a href="#s5">Dados de autenticação</a></li>
+      <li><a href="#s6">Dados de saúde e bem-estar</a></li>
+      <li><a href="#s7">Seus direitos (LGPD)</a></li>
+      <li><a href="#s8">Segurança</a></li>
+      <li><a href="#s9">Crianças e adolescentes</a></li>
+      <li><a href="#s10">Alterações nesta política</a></li>
+      <li><a href="#s11">Contato</a></li>
+    </ol>
+  </div>
+
+  <!-- 1 -->
+  <div class="secao" id="s1">
+    <p class="secao-num">01</p>
+    <h2>Quem somos</h2>
+    <p>O aplicativo <strong>Meu Dia com MDT</strong> é desenvolvido e mantido pela <strong>Meridiano Tecnologia</strong>, empresa com sede em Belo Horizonte, Minas Gerais, Brasil.</p>
+    <p>Esta política descreve como tratamos as informações dos usuários do aplicativo, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).</p>
+  </div>
+
+  <!-- 2 -->
+  <div class="secao" id="s2">
+    <p class="secao-num">02</p>
+    <h2>Quais dados coletamos</h2>
+    <p>O Meu Dia com MDT coleta apenas os dados que você mesmo insere no aplicativo. Não coletamos dados automaticamente, não rastreamos seu comportamento e não acessamos informações do seu dispositivo sem sua ação direta.</p>
+    <p>Os dados inseridos pelo usuário incluem:</p>
+    <ul class="lista">
+      <li>Nome e endereço de e-mail (cadastro)</li>
+      <li>Altura, peso atual e meta de peso</li>
+      <li>Registros de sono (horas por noite)</li>
+      <li>Registros de humor diário (escala de 1 a 5)</li>
+      <li>Registros de atividade física</li>
+      <li>Registros de jejum intermitente</li>
+      <li>Registros de hidratação</li>
+      <li>Tarefas, eventos e lembretes</li>
+      <li>Metas e tarefas semanais</li>
+    </ul>
+  </div>
+
+  <!-- 3 -->
+  <div class="secao" id="s3">
+    <p class="secao-num">03</p>
+    <h2>Como os dados são armazenados</h2>
+    <div class="destaque">
+      <p>✅ <strong>Todos os dados de saúde e produtividade são armazenados exclusivamente no seu dispositivo.</strong> Nenhuma informação de saúde, humor, peso, sono, jejum ou hidratação é enviada para servidores externos.</p>
+    </div>
+    <p>Utilizamos o <strong>AsyncStorage</strong> — um mecanismo de armazenamento local do próprio dispositivo — para salvar suas informações. Isso significa que:</p>
+    <ul class="lista">
+      <li>Os dados ficam no seu celular, sob seu controle</li>
+      <li>Não temos acesso a essas informações</li>
+      <li>Se você desinstalar o aplicativo, os dados são removidos automaticamente</li>
+      <li>Os dados não são sincronizados entre dispositivos (funcionalidade futura, com consentimento)</li>
+    </ul>
+  </div>
+
+  <!-- 4 -->
+  <div class="secao" id="s4">
+    <p class="secao-num">04</p>
+    <h2>Com quem compartilhamos</h2>
+    <div class="destaque">
+      <p>🔒 <strong>Não compartilhamos seus dados com terceiros.</strong> Não vendemos, alugamos ou cedemos informações pessoais a nenhuma empresa, parceiro ou plataforma de publicidade.</p>
+    </div>
+    <p>O aplicativo não contém anúncios e não utiliza ferramentas de rastreamento ou análise comportamental.</p>
+  </div>
+
+  <!-- 5 -->
+  <div class="secao" id="s5">
+    <p class="secao-num">05</p>
+    <h2>Dados de autenticação</h2>
+    <p>Para criar e acessar sua conta, utilizamos o serviço <strong>Supabase Auth</strong>, que armazena de forma segura seu endereço de e-mail e senha (criptografada). Esses dados são necessários exclusivamente para autenticação.</p>
+    <p>O Supabase é uma plataforma de infraestrutura em nuvem que opera em conformidade com padrões internacionais de segurança. Você pode consultar a política de privacidade do Supabase em <a href="https://supabase.com/privacy" target="_blank" style="color:var(--verde);">supabase.com/privacy</a>.</p>
+    <p>Tecnologias utilizadas na autenticação: <span class="tag">Supabase Auth</span> <span class="tag">JWT</span> <span class="tag">HTTPS</span></p>
+  </div>
+
+  <!-- 6 -->
+  <div class="secao" id="s6">
+    <p class="secao-num">06</p>
+    <h2>Dados de saúde e bem-estar</h2>
+    <p>O Meu Dia com MDT coleta informações que podem ser classificadas como <strong>dados sensíveis de saúde</strong> pela LGPD, incluindo peso, sono, humor, atividade física, jejum e hidratação.</p>
+    <p>O tratamento desses dados tem como base legal o <strong>consentimento do titular</strong> (art. 11, I da LGPD). Ao inserir essas informações no aplicativo, você consente com seu armazenamento local para as finalidades descritas nesta política.</p>
+    <p>Esses dados são utilizados exclusivamente para:</p>
+    <ul class="lista">
+      <li>Exibir gráficos e relatórios de acompanhamento pessoal</li>
+      <li>Calcular métricas como IMC e progresso de hidratação</li>
+      <li>Gerar o resumo diário e o coach inteligente da tela Hoje</li>
+    </ul>
+    <p>Esses dados <strong>nunca saem do seu dispositivo</strong> e não são acessíveis pela Meridiano Tecnologia.</p>
+  </div>
+
+  <!-- 7 -->
+  <div class="secao" id="s7">
+    <p class="secao-num">07</p>
+    <h2>Seus direitos (LGPD)</h2>
+    <p>Como titular dos dados, você tem os seguintes direitos garantidos pela LGPD:</p>
+    <ul class="lista">
+      <li><strong>Acesso</strong> — visualizar os dados que inseriu no aplicativo</li>
+      <li><strong>Correção</strong> — editar qualquer informação incorreta diretamente no app</li>
+      <li><strong>Exclusão</strong> — excluir registros individuais ou desinstalar o app para remover todos os dados locais</li>
+      <li><strong>Revogação do consentimento</strong> — você pode parar de usar o app a qualquer momento</li>
+      <li><strong>Portabilidade</strong> — entre em contato para solicitar exportação dos dados de autenticação</li>
+      <li><strong>Informação</strong> — saber com quem seus dados são compartilhados (resposta: com ninguém)</li>
+    </ul>
+    <p>Para exercer qualquer um desses direitos, entre em contato pelos canais indicados na seção 11.</p>
+  </div>
+
+  <!-- 8 -->
+  <div class="secao" id="s8">
+    <p class="secao-num">08</p>
+    <h2>Segurança</h2>
+    <p>Adotamos as seguintes medidas para proteger suas informações:</p>
+    <ul class="lista">
+      <li>Senhas armazenadas com criptografia — nunca em texto simples</li>
+      <li>Comunicação com servidores via HTTPS (TLS)</li>
+      <li>Dados de saúde armazenados apenas localmente, sem transmissão</li>
+      <li>Sem coleta de dados desnecessários</li>
+    </ul>
+    <p>Nenhum sistema é 100% seguro. Em caso de incidente de segurança que afete seus dados, notificaremos os usuários e a ANPD nos prazos legais.</p>
+  </div>
+
+  <!-- 9 -->
+  <div class="secao" id="s9">
+    <p class="secao-num">09</p>
+    <h2>Crianças e adolescentes</h2>
+    <p>O Meu Dia com MDT é destinado a usuários com <strong>18 anos ou mais</strong>. Não coletamos intencionalmente dados de menores de idade. Caso identifiquemos que um menor cadastrou uma conta, excluiremos os dados imediatamente.</p>
+  </div>
+
+  <!-- 10 -->
+  <div class="secao" id="s10">
+    <p class="secao-num">10</p>
+    <h2>Alterações nesta política</h2>
+    <p>Esta política pode ser atualizada periodicamente. Quando houver alterações relevantes, notificaremos os usuários pelo aplicativo ou por e-mail. A data da última atualização está sempre indicada no topo desta página.</p>
+    <p>Recomendamos que você revise esta política periodicamente.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="secao" id="s11">
+    <p class="secao-num">11</p>
+    <h2>Contato</h2>
+    <p>Para dúvidas, solicitações relacionadas aos seus dados ou qualquer questão sobre esta política, entre em contato com o encarregado de dados da Meridiano Tecnologia:</p>
+  </div>
+
+  <div class="contato-box">
+    <h3>Meridiano Tecnologia</h3>
+    <p>Hugo Salis · Belo Horizonte, MG · Brasil</p>
+    <div class="contato-links">
+      <a href="mailto:hugo@meridianotecnologia.com.br" class="contato-link">
+        ✉️ hugo@meridianotecnologia.com.br
+      </a>
+      <a href="https://wa.me/5531975097001" target="_blank" class="contato-link">
+        💬 (31) 9 7509-7001
+      </a>
+    </div>
+  </div>
+
+  <hr>
+  <p style="font-size:.8rem;color:var(--suave);text-align:center;">
+    Este documento foi elaborado em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018) e com os requisitos da Apple App Store e Google Play Store.
+  </p>
+
+</div>
+
+<footer>
+  <p>© 2026 Meridiano Tecnologia · <a href="/">meridianotecnologia.com.br</a></p>
+</footer>
+
+</body>
+</html>
