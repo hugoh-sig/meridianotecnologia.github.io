@@ -1,0 +1,593 @@
+<!doctype html>
+<!--
+  Acesso a pé aos centros de saúde de Belo Horizonte, página do artefato.
+  IMPORTANTE: o arquivo setores.pmtiles é lido por requisições HTTP Range
+  (206 Partial Content). O servidor que hospedar esta pasta PRECISA suportar
+  o cabeçalho Range. O `python3 -m http.server` puro NÃO suporta; use
+  `python3 preview/servir.py` (neste repo), GitHub Pages, ou qualquer CDN.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanto se caminha até o centro de saúde em Belo Horizonte</title>
+<meta name="description" content="Distância a pé, pela rede viária, de cada setor censitário de Belo Horizonte até o centro de saúde municipal mais próximo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231B4D3E'/%3E%3Cpath d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script src="vendor/maplibre-gl.js" defer></script>
+<script src="vendor/pmtiles.js" defer></script>
+<link href="vendor/maplibre-gl.css" rel="stylesheet">
+<style>
+  /* Inter self-hosted (fonte variável, cobre os pesos 400/500/700) */
+  @font-face {
+    font-family: 'Inter'; font-style: normal; font-weight: 400 700;
+    font-display: swap;
+    src: url('fonts/inter-variable-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'Inter'; font-style: normal; font-weight: 400 700;
+    font-display: swap;
+    src: url('fonts/inter-variable-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #fafafa;
+    color: #111816;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .coluna { max-width: 900px; margin: 0 auto; padding: 0 1.25rem; }
+  a { color: #1B4D3E; }
+  a:focus-visible, button:focus-visible {
+    outline: 3px solid #1B4D3E; outline-offset: 2px;
+  }
+  header.cabecalho { padding: 3.5rem 0 2rem; }
+  h1 {
+    color: #1B4D3E; font-weight: 700; font-size: 2rem;
+    line-height: 1.25; max-width: 34ch;
+  }
+  .subtitulo { margin-top: .75rem; font-size: 1.05rem; color: #3d4a45; max-width: 62ch; }
+  /* três números */
+  .numeros {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; padding: 1.5rem 0 2.5rem;
+  }
+  .numero b {
+    display: block; font-size: 2.6rem; font-weight: 700;
+    color: #1B4D3E; line-height: 1.1; letter-spacing: -0.02em;
+  }
+  .numero span { font-size: .9rem; color: #3d4a45; }
+  h2 { color: #1B4D3E; font-weight: 700; font-size: 1.3rem; margin-bottom: .75rem; }
+  section { padding-bottom: 2.5rem; }
+  /* mapa */
+  #mapa { height: 600px; width: 100%; border: 1px solid #d7ddda; border-radius: 6px; }
+  .legenda {
+    display: flex; align-items: center; flex-wrap: wrap; gap: .25rem .75rem;
+    margin-top: .6rem; font-size: .8rem; color: #3d4a45;
+  }
+  .legenda .faixa { display: flex; align-items: center; gap: .3rem; }
+  .legenda .cor { width: 22px; height: 12px; display: inline-block; border: 1px solid rgba(0,0,0,.15); }
+  .legenda .extremo { font-weight: 700; color: #111816; }
+  .legenda .cs-dot {
+    width: 11px; height: 11px; border-radius: 50%; background: #234078;
+    border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.3); display: inline-block;
+  }
+  .maplibregl-popup-content { font-family: 'Inter', sans-serif; font-size: .85rem; line-height: 1.5; }
+  #btn-enquadrar {
+    position: absolute; top: 10px; left: 10px; z-index: 5;
+    background: #fff; border: 1px solid #999; border-radius: 4px;
+    padding: .35rem .6rem; font: 500 .8rem 'Inter', sans-serif; cursor: pointer;
+  }
+  .mapa-wrap { position: relative; }
+  /* busca de bairro */
+  .busca-wrap { position: relative; max-width: 420px; margin-bottom: .35rem; }
+  .busca-linha { display: flex; gap: .5rem; }
+  #busca-bairro {
+    flex: 1; font: 400 .95rem 'Inter', sans-serif; color: #111816;
+    padding: .55rem .75rem; border: 1.5px solid #9aa5a0; border-radius: 6px;
+    background: #fff;
+  }
+  #busca-bairro:focus-visible { outline: 3px solid #1B4D3E; outline-offset: 1px; }
+  #btn-limpar, #btn-limpar-selecao {
+    font: 500 .85rem 'Inter', sans-serif; color: #1B4D3E; background: #fff;
+    border: 1.5px solid #1B4D3E; border-radius: 6px; padding: .45rem .7rem;
+    cursor: pointer;
+  }
+  #btn-limpar { display: none; }
+  /* painel de informação do setor (altura fixa: não desloca o layout) */
+  #painel-info {
+    height: 10.5rem; overflow-y: auto; margin-top: .6rem;
+    border: 1px solid #d7ddda; border-radius: 6px; background: #fff;
+    padding: .9rem 1rem; font-size: .9rem; line-height: 1.55;
+  }
+  #painel-info .pi-titulo { font-weight: 700; color: #1B4D3E; }
+  #painel-info .pi-vazio { color: #3d4a45; }
+  #painel-info .pi-bairro { color: #3d4a45; }
+  #btn-limpar-selecao { margin-top: .45rem; display: none; }
+  #lista-bairros {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
+    background: #fff; border: 1px solid #9aa5a0; border-top: none;
+    border-radius: 0 0 6px 6px; list-style: none; margin: 0; padding: 0;
+    max-height: 18rem; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,.08);
+  }
+  #lista-bairros li {
+    padding: .45rem .75rem; font-size: .9rem; cursor: pointer;
+  }
+  #lista-bairros li[aria-selected="true"], #lista-bairros li:hover {
+    background: #e8f0ee; color: #1B4D3E; font-weight: 500;
+  }
+  #busca-msg { font-size: .8rem; color: #8a4a00; min-height: 1.1rem; margin-top: .2rem; }
+  .busca-ajuda { font-size: .8rem; color: #3d4a45; margin-bottom: .75rem; }
+  /* histograma */
+  .hist-svg { width: 100%; height: auto; display: block; }
+  .tabela-acessivel {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  /* ficha técnica */
+  .ficha { font-size: .9rem; color: #26302c; }
+  .ficha h3 { font-size: 1rem; font-weight: 700; color: #1B4D3E; margin: 1.1rem 0 .35rem; }
+  .ficha ul, .ficha ol { padding-left: 1.4rem; }
+  .ficha li { margin-bottom: .35rem; }
+  footer {
+    border-top: 1px solid #d7ddda; padding: 1.5rem 0 3rem;
+    font-size: .85rem; color: #3d4a45;
+  }
+  @media (max-width: 640px) {
+    h1 { font-size: 1.5rem; }
+    .numeros { grid-template-columns: 1fr; gap: 1rem; }
+    #mapa { height: 420px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="coluna">
+
+  <!-- 1. TÍTULO -->
+  <header class="cabecalho">
+    <h1>Quanto se caminha até o centro de saúde em Belo Horizonte</h1>
+    <p class="subtitulo">Quanto cada parte da cidade precisa caminhar até o
+    centro de saúde mais próximo.</p>
+  </header>
+
+  <!-- 2. TRÊS NÚMEROS -->
+  <section class="numeros" aria-label="Números principais">
+    <p class="numero"><b>837&nbsp;m</b><span>é o que caminha o morador típico de Belo Horizonte</span></p>
+    <p class="numero"><b>64,7%</b><span>da população mora a menos de 1&nbsp;km de um centro de saúde</span></p>
+    <p class="numero"><b>155</b><span>centros de saúde municipais considerados</span></p>
+  </section>
+
+  <!-- 3. MAPA -->
+  <section aria-label="Mapa das distâncias">
+    <h2>O mapa, setor por setor</h2>
+
+    <div class="busca-wrap">
+      <label for="busca-bairro" style="font-size:.85rem;font-weight:500;display:block;margin-bottom:.25rem;">Bairro</label>
+      <div class="busca-linha">
+        <input id="busca-bairro" type="text" placeholder="Busque seu bairro"
+               role="combobox" aria-expanded="false" aria-autocomplete="list"
+               aria-controls="lista-bairros" autocomplete="off" spellcheck="false">
+        <button id="btn-limpar" type="button" aria-label="Limpar seleção de bairro e voltar à visão da cidade">Limpar</button>
+      </div>
+      <ul id="lista-bairros" role="listbox" aria-label="Sugestões de bairro" hidden></ul>
+      <p id="busca-msg" role="status" aria-live="polite"></p>
+    </div>
+    <p class="busca-ajuda">A busca localiza a região no mapa. Os valores mostrados
+    são do setor censitário, não de um endereço específico.</p>
+
+    <div class="mapa-wrap">
+      <div id="mapa" role="application"
+           aria-label="Mapa coroplético dos setores censitários de Belo Horizonte, coloridos pela distância a pé até o centro de saúde mais próximo. A mesma informação está disponível no gráfico de barras abaixo."></div>
+      <button id="btn-enquadrar" type="button">⤢ Reenquadrar</button>
+    </div>
+    <div id="painel-info" role="region" aria-live="polite" aria-label="Informações do setor selecionado">
+      <p class="pi-vazio">Clique em um setor do mapa para ver a distância até o
+      centro de saúde mais próximo.</p>
+    </div>
+    <div class="legenda" aria-hidden="false">
+      <span class="extremo">Mais perto</span>
+      <span class="faixa"><span class="cor" style="background:#1a9641"></span>&lt;&nbsp;500&nbsp;m</span>
+      <span class="faixa"><span class="cor" style="background:#a6d96a"></span>500 a 1.000</span>
+      <span class="faixa"><span class="cor" style="background:#ffffbf"></span>1.000 a 1.500</span>
+      <span class="faixa"><span class="cor" style="background:#fdae61"></span>1.500 a 2.000</span>
+      <span class="faixa"><span class="cor" style="background:#d7191c"></span>&gt;&nbsp;2.000&nbsp;m</span>
+      <span class="extremo">Mais longe</span>
+      <span class="faixa"><span class="cs-dot"></span>centro de saúde</span>
+      <span class="faixa"><span style="display:inline-block;width:22px;border-top:3px solid #1a237e;"></span>percurso pelas ruas (ao clicar)</span>
+      <span class="faixa"><span style="display:inline-block;width:22px;border-top:2px dashed #555;"></span>linha reta</span>
+    </div>
+    <p style="font-size:.8rem;color:#3d4a45;margin-top:.4rem;">Clique em um
+    setor para ver a distância, o tempo estimado a pé e a unidade mais próxima.</p>
+  </section>
+
+  <!-- 4. HISTOGRAMA -->
+  <section aria-labelledby="hist-titulo">
+    <h2 id="hist-titulo">Quantas pessoas vivem a cada distância</h2>
+    <svg class="hist-svg" viewBox="0 0 860 360" role="img"
+         aria-labelledby="hist-desc">
+      <title id="hist-desc">Gráfico de barras da população por faixa de
+      distância a pé: menos de 500 metros, 419.567 habitantes; de 500 a 1.000
+      metros, 1.078.160; de 1.000 a 1.500, 583.031; de 1.500 a 2.000, 185.666;
+      acima de 2.000 metros, 49.136.</title>
+      <!-- eixo y: 0 a 1,1 mi ; área útil y=20..300 (280px) ; escala 280/1100000 -->
+      <g font-family="Inter, sans-serif" font-size="12" fill="#3d4a45">
+        <line x1="70" y1="20"  x2="850" y2="20"  stroke="#e3e8e5"/>
+        <line x1="70" y1="90"  x2="850" y2="90"  stroke="#e3e8e5"/>
+        <line x1="70" y1="173" x2="850" y2="173" stroke="#e3e8e5"/>
+        <line x1="70" y1="236" x2="850" y2="236" stroke="#e3e8e5"/>
+        <line x1="70" y1="300" x2="850" y2="300" stroke="#9aa5a0"/>
+        <text x="62" y="24"  text-anchor="end">1,1 mi</text>
+        <text x="62" y="94"  text-anchor="end">825 mil</text>
+        <text x="62" y="177" text-anchor="end">500 mil</text>
+        <text x="62" y="240" text-anchor="end">250 mil</text>
+        <text x="62" y="304" text-anchor="end">0</text>
+        <text x="16" y="160" transform="rotate(-90 16 160)" text-anchor="middle">habitantes</text>
+      </g>
+      <!-- barras: largura 120, espaçamento 32, x0=90 ; h = pop*280/1100000 -->
+      <g>
+        <rect x="90"  y="193.2" width="120" height="106.8" fill="#1a9641"><title>419.567 habitantes</title></rect>
+        <rect x="242" y="25.6"  width="120" height="274.4" fill="#a6d96a"><title>1.078.160 habitantes</title></rect>
+        <rect x="394" y="151.6" width="120" height="148.4" fill="#ffffbf" stroke="#c9c98f" stroke-width="1"><title>583.031 habitantes</title></rect>
+        <rect x="546" y="252.7" width="120" height="47.3"  fill="#fdae61"><title>185.666 habitantes</title></rect>
+        <rect x="698" y="287.5" width="120" height="12.5"  fill="#d7191c"><title>49.136 habitantes</title></rect>
+      </g>
+      <g font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#111816" text-anchor="middle">
+        <text x="150" y="186">419.567</text>
+        <text x="302" y="18.5">1.078.160</text>
+        <text x="454" y="144">583.031</text>
+        <text x="606" y="245">185.666</text>
+        <text x="758" y="280">49.136</text>
+      </g>
+      <g font-family="Inter, sans-serif" font-size="12.5" fill="#3d4a45" text-anchor="middle">
+        <text x="150" y="322">&lt; 500 m</text>
+        <text x="302" y="322">500 a 1.000 m</text>
+        <text x="454" y="322">1.000 a 1.500 m</text>
+        <text x="606" y="322">1.500 a 2.000 m</text>
+        <text x="758" y="322">&gt; 2.000 m</text>
+      </g>
+    </svg>
+    <table class="tabela-acessivel">
+      <caption>População por faixa de distância a pé até o centro de saúde mais próximo</caption>
+      <tr><th scope="col">Faixa</th><th scope="col">Habitantes</th></tr>
+      <tr><td>menos de 500 m</td><td>419.567</td></tr>
+      <tr><td>500 a 1.000 m</td><td>1.078.160</td></tr>
+      <tr><td>1.000 a 1.500 m</td><td>583.031</td></tr>
+      <tr><td>1.500 a 2.000 m</td><td>185.666</td></tr>
+      <tr><td>mais de 2.000 m</td><td>49.136</td></tr>
+    </table>
+  </section>
+
+  <!-- 5. FICHA TÉCNICA -->
+  <section class="ficha" aria-labelledby="ficha-titulo">
+    <h2 id="ficha-titulo">Ficha técnica</h2>
+
+    <h3>Fontes</h3>
+    <ul>
+      <li><a href="https://dados.pbh.gov.br/dataset/rede-de-assistencia-saude">Rede de Assistência Saúde, da PBH/SMSA</a>, snapshot de 1º/jul/2026, licença CC-BY.</li>
+      <li><a href="https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/">Malha de setores censitários e agregados por setor do Censo 2022, do IBGE</a> (malha de nov/2024; agregado Básico de mai/2026), uso livre com atribuição.</li>
+      <li><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>: rede de pedestres obtida via OSMnx em 14/ago/2026, licença ODbL.</li>
+    </ul>
+
+    <h3>Método</h3>
+    <p>O cálculo parte das 155 unidades básicas municipais, das categorias CS e
+    CSPPP. Para cada um dos 5.166 setores censitários, a origem é o centroide do
+    setor. De lá, mede-se o caminho mais curto pela rede de pedestres até cada um
+    dos 5 centros de saúde mais próximos em linha reta, e vale o menor dos cinco.
+    Todos os cálculos usam a projeção SIRGAS 2000 / UTM 23S (EPSG:31983). O tempo
+    a pé assume velocidade de 5&nbsp;km/h.</p>
+
+    <h3>Limitações</h3>
+    <ol>
+      <li>Distância não é acesso. O cálculo ignora declividade, barreiras
+      físicas, horário de funcionamento, lotação e a área de abrangência
+      oficial da SMSA.</li>
+      <li>O ponto de partida é o centro de cada setor censitário, não a casa
+      de cada morador. A busca também considera apenas os cinco centros de
+      saúde mais próximos em linha reta, então em situações viárias extremas
+      a unidade mais próxima pelas ruas pode ser outra.</li>
+      <li>A rede de ruas vem do OpenStreetMap e tem falhas. Em um setor a via
+      mapeada mais próxima ficou a 751 metros do centro.</li>
+      <li>Só entram as unidades básicas municipais. UPAs, hospitais e unidades
+      estaduais, federais ou privadas ficam de fora.</li>
+      <li>As fontes têm datas diferentes: população de 2022, unidades de julho
+      de 2026, ruas de agosto de 2026. O tempo a pé usa velocidade fixa de
+      5&nbsp;km/h.</li>
+    </ol>
+
+    <h3>Atribuição</h3>
+    <p>Dados de ruas © OpenStreetMap contributors, sob
+    <a href="https://opendatacommons.org/licenses/odbl/">ODbL</a>.</p>
+  </section>
+
+</div>
+
+<!-- 6. RODAPÉ -->
+<footer>
+  <div class="coluna">
+    <p><b>Meridiano Tecnologia</b> ·
+    <a href="#" aria-disabled="true" title="Nota técnica em preparação">Nota técnica (em breve)</a> ·
+    <a href="https://github.com/meridianotecnologia">Repositório</a></p>
+  </div>
+</footer>
+
+<script>
+// Os scripts do MapLibre/PMTiles carregam com defer; este bloco inline roda
+// antes deles, então NADA aqui referencia maplibregl no nível superior.
+// O mapa só é criado quando o container entra na viewport (item 4).
+const BBOX_BH = [[-44.0633, -20.0597], [-43.8572, -19.7764]];
+const fmt = n => new Intl.NumberFormat("pt-BR").format(n);
+
+// Requisição ÚNICA de centros_saude.geojson: alimenta o popup (nomes por id)
+// e a source do mapa (objeto GeoJSON, sem segundo download).
+let nomesCS = {}, coordCS = {};
+const csPromise = fetch("centros_saude.geojson").then(r => r.json()).then(gj => {
+  for (const f of gj.features) {
+    nomesCS[f.properties.id] = f.properties.nome;
+    coordCS[f.properties.id] = f.geometry.coordinates;
+  }
+  return gj;
+});
+
+// Título em capitalização natural. Acentos que EXISTEM na fonte são
+// preservados (toLowerCase mantém acentuação); nenhum acento é inventado.
+const MINUSCULAS = new Set(["de", "da", "do", "das", "dos", "e"]);
+function nomeNatural(nome) {
+  if (!nome) return "mais próximo";
+  const n = nome.replace(/^CENTRO DE SAUDE /, "");
+  return n.toLowerCase().split(/\s+/).map((w, i) =>
+    (i > 0 && MINUSCULAS.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)
+  ).join(" ");
+}
+
+let map = null;             // criado sob demanda
+let mapCarregado = false;   // vira true no evento 'load' do estilo
+let pendenteBairro = null;  // seleção feita antes de o mapa existir
+
+// ── Painel fixo abaixo do mapa (substitui o popup flutuante) ──
+const painel = document.getElementById("painel-info");
+const PAINEL_VAZIO = '<p class="pi-vazio">Clique em um setor do mapa para ver ' +
+  'a distância até o centro de saúde mais próximo.</p>';
+
+function mostrarPainelSetor(p) {
+  const min = Math.round(p.dist_rede_m / (5000 / 60));
+  const pct = Math.round((p.razao - 1) * 100);
+  const nome = nomeNatural(nomesCS[p.id_cs_mais_proximo_rede]);
+  painel.innerHTML =
+    `<p class="pi-titulo">${fmt(p.dist_rede_m)} m até o Centro de Saúde ${nome}</p>` +
+    `<p>cerca de ${fmt(min)} min a pé · ${fmt(p.populacao)} moradores</p>` +
+    `<p>Em linha reta seriam ${fmt(p.dist_euclidiana_m)} m. O percurso real é ${fmt(pct)}% mais longo.</p>` +
+    `<p class="pi-bairro">Bairro: ${p.bairro || "(sem bairro)"}</p>` +
+    `<button id="btn-limpar-selecao" type="button" style="display:inline-block">Limpar seleção</button>`;
+}
+
+function limparSelecao() {
+  painel.innerHTML = PAINEL_VAZIO;
+  if (!map) return;
+  map.setFilter("setor-sel", ["==", ["get", "cd_setor"], "__nenhum__"]);
+  if (map.getSource("rotas")) {
+    map.setFilter("rota-real", ["==", ["get", "cd_setor"], "__nenhum__"]);
+    map.setFilter("rota-reta", ["==", ["get", "cd_setor"], "__nenhum__"]);
+    map.setFilter("cs-destino", ["==", ["get", "id"], -1]);
+  }
+}
+painel.addEventListener("click", ev => {
+  if (ev.target && ev.target.id === "btn-limpar-selecao") limparSelecao();
+});
+
+function quandoVendorPronto(cb) {
+  if (typeof maplibregl !== "undefined" && typeof pmtiles !== "undefined") cb();
+  else window.addEventListener("load", cb, { once: true });
+}
+
+async function iniciarMapa() {
+  if (map || typeof maplibregl === "undefined") return;
+  const csDados = await csPromise;
+  if (map) return;
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+  map = new maplibregl.Map({
+  container: "mapa",
+  bounds: BBOX_BH,
+  fitBoundsOptions: { padding: 20 },
+  attributionControl: { compact: true },
+  style: {
+    version: 8,
+    sources: {
+      base: {
+        type: "raster",
+        tiles: ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
+        tileSize: 256,
+        attribution: "© OpenStreetMap contributors © CARTO"
+      },
+      setores: { type: "vector", url: "pmtiles://" + new URL("setores.pmtiles", location.href).href },
+      cs: { type: "geojson", data: csDados }
+    },
+    layers: [
+      { id: "base", type: "raster", source: "base" },
+      { id: "setores-fill", type: "fill", source: "setores", "source-layer": "setores",
+        paint: {
+          "fill-color": ["step", ["get", "dist_rede_m"],
+            "#1a9641", 500, "#a6d96a", 1000, "#ffffbf", 1500, "#fdae61", 2000, "#d7191c"],
+          "fill-opacity": 0.62 } },
+      { id: "setores-linha", type: "line", source: "setores", "source-layer": "setores",
+        paint: { "line-color": "#444", "line-width": 0.25, "line-opacity": 0.5 } },
+      { id: "setores-destaque", type: "line", source: "setores", "source-layer": "setores",
+        filter: ["==", ["get", "bairro"], "__nenhum__"],
+        paint: { "line-color": "#1B4D3E", "line-width": 2.2 } },
+      { id: "setor-sel", type: "line", source: "setores", "source-layer": "setores",
+        filter: ["==", ["get", "cd_setor"], "__nenhum__"],
+        paint: { "line-color": "#3d3d3d", "line-width": 1.8 } },
+      { id: "cs-pontos", type: "circle", source: "cs",
+        paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3.5, 14, 6],
+                 "circle-color": "#234078",
+                 "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.5 } }
+    ]
+  }
+});
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
+
+  // Camadas de rota: criadas apenas no primeiro clique, nunca no load.
+  function garantirCamadasRota() {
+    if (map.getSource("rotas")) return;
+    map.addSource("rotas", {
+      type: "vector",
+      url: "pmtiles://" + new URL("rotas.pmtiles", location.href).href
+    });
+    map.addLayer({ id: "rota-reta", type: "line", source: "rotas", "source-layer": "retas",
+      filter: ["==", ["get", "cd_setor"], "__nenhum__"],
+      paint: { "line-color": "#555555", "line-width": 1.2, "line-dasharray": [2, 2] } });
+    map.addLayer({ id: "rota-real", type: "line", source: "rotas", "source-layer": "rotas",
+      filter: ["==", ["get", "cd_setor"], "__nenhum__"],
+      paint: { "line-color": "#1a237e", "line-width": 3.2, "line-opacity": 0.9 } });
+    map.addLayer({ id: "cs-destino", type: "circle", source: "cs",
+      filter: ["==", ["get", "id"], -1],
+      paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 6, 14, 9],
+               "circle-color": "#234078",
+               "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } });
+  }
+
+  // Cliques sucessivos: source e camadas são criadas UMA vez (acima) e daqui
+  // em diante só os filtros mudam. Nada de remover/recriar layer por clique.
+  map.on("click", "setores-fill", e => {
+    const p = e.features[0].properties;
+    const idCS = p.id_cs_mais_proximo_rede;
+
+    garantirCamadasRota();
+    map.setFilter("rota-real", ["==", ["get", "cd_setor"], p.cd_setor]);
+    map.setFilter("rota-reta", ["==", ["get", "cd_setor"], p.cd_setor]);
+    map.setFilter("cs-destino", ["==", ["get", "id"], Number(idCS)]);
+    map.setFilter("setor-sel", ["==", ["get", "cd_setor"], p.cd_setor]);
+
+    // as rotas existem de z12 a z16; em zoom baixo, aproxima até ficar legível
+    const destino = coordCS[idCS];
+    if (destino && map.getZoom() < 12.5) {
+      const b = new maplibregl.LngLatBounds();
+      b.extend([e.lngLat.lng, e.lngLat.lat]); b.extend(destino);
+      map.fitBounds(b, { padding: 80, maxZoom: 15 });
+    }
+    mostrarPainelSetor(p);
+  });
+  map.on("click", "cs-pontos", e => {
+    const p = e.features[0].properties;
+    painel.innerHTML = `<p class="pi-titulo">Centro de Saúde ${nomeNatural(p.nome)}</p>`;
+  });
+  map.on("mouseenter", "setores-fill", () => map.getCanvas().style.cursor = "pointer");
+  map.on("mouseleave", "setores-fill", () => map.getCanvas().style.cursor = "");
+  map.on("load", () => {
+    mapCarregado = true;
+    if (pendenteBairro) { aplicarBairro(pendenteBairro); pendenteBairro = null; }
+  });
+}
+
+// Inicialização sob demanda: quando o container do mapa se aproxima da
+// viewport. Sem IntersectionObserver, inicializa assim que os vendors carregam.
+const elMapa = document.getElementById("mapa");
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(entradas => {
+    if (entradas.some(e => e.isIntersecting)) {
+      io.disconnect();
+      quandoVendorPronto(iniciarMapa);
+    }
+  }, { rootMargin: "400px" });
+  io.observe(elMapa);
+} else {
+  quandoVendorPronto(iniciarMapa);
+}
+
+document.getElementById("btn-enquadrar").addEventListener("click", () => {
+  if (map) map.fitBounds(BBOX_BH, { padding: 20 });
+});
+
+// ── Busca de bairro (autocomplete local, sem serviço externo) ──
+let bairros = [];
+fetch("bairros.json").then(r => r.json()).then(d => bairros = d);
+
+const norm = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const campo = document.getElementById("busca-bairro");
+const lista = document.getElementById("lista-bairros");
+const msg = document.getElementById("busca-msg");
+const btnLimpar = document.getElementById("btn-limpar");
+let sugestoes = [], ativo = -1;
+
+function fecharLista() {
+  lista.hidden = true; lista.innerHTML = ""; ativo = -1;
+  campo.setAttribute("aria-expanded", "false");
+  campo.removeAttribute("aria-activedescendant");
+}
+
+function renderLista() {
+  lista.innerHTML = "";
+  sugestoes.forEach((b, i) => {
+    const li = document.createElement("li");
+    li.id = "bairro-op-" + i;
+    li.setAttribute("role", "option");
+    li.setAttribute("aria-selected", i === ativo ? "true" : "false");
+    li.textContent = b.nome;
+    li.addEventListener("mousedown", ev => { ev.preventDefault(); escolher(b); });
+    lista.appendChild(li);
+  });
+  lista.hidden = sugestoes.length === 0;
+  campo.setAttribute("aria-expanded", String(sugestoes.length > 0));
+  if (ativo >= 0) campo.setAttribute("aria-activedescendant", "bairro-op-" + ativo);
+  else campo.removeAttribute("aria-activedescendant");
+}
+
+function aplicarBairro(b) {
+  map.setFilter("setores-destaque", ["==", ["get", "bairro"], b.nome]);
+  map.fitBounds([[b.bbox[0], b.bbox[1]], [b.bbox[2], b.bbox[3]]], { padding: 60 });
+}
+
+function escolher(b) {
+  campo.value = b.nome;
+  fecharLista();
+  msg.textContent = "";
+  btnLimpar.style.display = "inline-block";
+  if (mapCarregado) aplicarBairro(b);
+  else { pendenteBairro = b; quandoVendorPronto(iniciarMapa); }
+}
+
+function limpar() {
+  campo.value = "";
+  fecharLista();
+  msg.textContent = "";
+  btnLimpar.style.display = "none";
+  pendenteBairro = null;
+  if (map) {
+    map.setFilter("setores-destaque", ["==", ["get", "bairro"], "__nenhum__"]);
+    map.fitBounds(BBOX_BH, { padding: 20 });
+  }
+}
+btnLimpar.addEventListener("click", limpar);
+
+campo.addEventListener("input", () => {
+  const q = norm(campo.value.trim());
+  msg.textContent = "";
+  if (!q) { fecharLista(); return; }
+  sugestoes = bairros.filter(b => norm(b.nome).includes(q)).slice(0, 8);
+  ativo = -1;
+  renderLista();
+  if (sugestoes.length === 0) msg.textContent = "Bairro não encontrado";
+});
+
+campo.addEventListener("keydown", e => {
+  if (lista.hidden && e.key !== "Escape") return;
+  if (e.key === "ArrowDown") {
+    e.preventDefault(); ativo = Math.min(ativo + 1, sugestoes.length - 1); renderLista();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault(); ativo = Math.max(ativo - 1, 0); renderLista();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (ativo >= 0) escolher(sugestoes[ativo]);
+    else if (sugestoes.length === 1) escolher(sugestoes[0]);
+  } else if (e.key === "Escape") {
+    fecharLista();
+  }
+});
+campo.addEventListener("blur", () => setTimeout(fecharLista, 150));
+</script>
+</body>
+</html>
