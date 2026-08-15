@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-58 -58 116 116" width="116" height="116" style="color:#1B4D3E" role="img" aria-label="Meridiano Tecnologia">
+  <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round">
+    <path d="M0,-52 A52,52 0 0,0 0,52"/>
+    <path d="M0,-52 A30,52 0 0,0 0,52"/>
+    <path d="M0,-52 A52,52 0 0,1 0,52"/>
+    <path d="M0,-52 L0,52"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+    <path d="M-42.5,-30 Q-21.3,-23 0,-30"/>
+    <path d="M-52,0 Q-26,8 0,0"/>
+    <path d="M-42.5,30 Q-21.3,37 0,30"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M0,-52 L24,-26 L30.6,-42.1"/>
+    <path d="M49.5,-16.1 L24,-26 L0,0"/>
+    <path d="M24,-26 L30,0 L24,26"/>
+    <path d="M49.5,-16.1 L30,0 L49.5,16.1"/>
+    <path d="M0,0 L30,0"/>
+    <path d="M0,0 L24,26 L30.6,42.1"/>
+    <path d="M24,26 L0,52"/>
+  </g>
+  <g fill="currentColor">
+    <circle cx="30.6" cy="-42.1" r="3.5"/>
+    <circle cx="49.5" cy="-16.1" r="6"/>
+    <circle cx="49.5" cy="16.1" r="3.5"/>
+    <circle cx="30.6" cy="42.1" r="3.5"/>
+    <circle cx="24" cy="-26" r="4.5"/>
+    <circle cx="30" cy="0" r="4.5"/>
+    <circle cx="24" cy="26" r="4.5"/>
+    <circle cx="0" cy="0" r="6.5"/>
+  </g>
+</svg>
