@@ -2,3 +2,19 @@
 Thumbs.db
 Desktop.ini
 *.swp
+
+# Ambiente Python do pipeline de sensoriamento (nunca versionar; sem credenciais no repo)
+.venv/
+__pycache__/
+*.pyc
+
+# Arquivos acima de 50 MB: entradas adicionadas automaticamente pelo pipeline,
+# com hash registrado em PROCEDENCIA-S2.md
+dados/bruto/sensoriamento/fortaleza/fortaleza_ndvi.tif
+dados/processado/sensoriamento/fortaleza/fortaleza_ndvi_cog.tif
+dados/processado/sensoriamento/fortaleza/fortaleza_mndwi_cog.tif
+dados/bruto/sensoriamento/foz-sao-francisco/foz-sao-francisco_ndvi.tif
+dados/processado/sensoriamento/foz-sao-francisco/foz-sao-francisco_ndvi_cog.tif
+dados/processado/sensoriamento/foz-sao-francisco/foz-sao-francisco_mndwi_cog.tif
+dados/processado/sensoriamento/tres-marias/tres-marias_ndvi_cog.tif
+dados/processado/sensoriamento/tres-marias/tres-marias_mndwi_cog.tif

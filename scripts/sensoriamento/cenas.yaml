@@ -1,0 +1,151 @@
+# Configuração do pipeline de sensoriamento remoto (Sentinel-2).
+# Para processar outra área de interesse, adicione uma nova cena neste
+# arquivo e rode: python scripts/sensoriamento/pipeline.py --cena <nome>
+# Nenhuma credencial é armazenada aqui nem em qualquer arquivo do repositório:
+# a autenticação usa as credenciais de usuário do earthengine-api já
+# existentes na máquina (~/.config/earthengine/, fora do repositório).
+
+projeto_ee: ee-hugohcsalis2
+colecao: COPERNICUS/S2_SR_HARMONIZED
+
+# Classes da banda SCL removidas pela máscara (Sen2Cor Scene Classification):
+#   3 = sombra de nuvem, 8 = nuvem (probabilidade média), 9 = nuvem
+#   (probabilidade alta), 10 = cirrus fino, 11 = neve/gelo
+scl_mascara: [3, 8, 9, 10, 11]
+
+cenas:
+  fortaleza:
+    # bbox em WGS84 (EPSG:4326), ordem [oeste, sul, leste, norte].
+    #
+    # Memória de cálculo (registrada também na FICHA.md):
+    #   Centro de referência: centro de Fortaleza (Praça do Ferreira),
+    #   aprox. lon -38.527, lat -3.728. A linha de costa corre a N/NE
+    #   da cidade, então o quadrado é centrado em lon -38.53 e
+    #   deslocado para que ~40% da metade norte seja oceano.
+    #   Na latitude ~-3.7:
+    #     1 grau de latitude  ≈ 110.57 km  ->  40 km ≈ 0.362 graus
+    #     1 grau de longitude ≈ 111.32 x cos(3.7 graus) ≈ 111.08 km
+    #                                          ->  40 km ≈ 0.360 graus
+    #   Longitude: -38.71 a -38.35 (delta 0.36 graus ≈ 40.0 km),
+    #     da Barra do Ceará (oeste) ao Porto das Dunas/Aquiraz (leste).
+    #   Latitude: -3.90 a -3.54 (delta 0.36 graus ≈ 39.8 km),
+    #     ~18 km de oceano ao norte da costa e ~22 km de continente.
+    bbox: [-38.71, -3.90, -38.35, -3.54]
+
+    # Estação seca de Fortaleza: aproximadamente julho a dezembro
+    # (a quadra chuvosa vai de fevereiro a maio). Em 2026-08-16, a
+    # janela de 3 meses mais recente contida integralmente na estação
+    # seca é out-dez/2025 (jul/2026 até hoje daria só ~1,5 mês).
+    # data_final é exclusiva.
+    data_inicial: "2025-10-01"
+    data_final: "2026-01-01"
+
+    # Percentual máximo de nuvem por cena (metadado CLOUDY_PIXEL_PERCENTAGE)
+    nuvem_max: 20
+
+    # Esticamento da composição cor verdadeira: linear, refletância de
+    # superfície 0.00-0.25 (DN 0-2500 da coleção harmonizada) -> 0-255
+    estic_cor_verdadeira: [0, 2500]
+
+  foz-sao-francisco:
+    # bbox em WGS84 (EPSG:4326), ordem [oeste, sul, leste, norte].
+    #
+    # Memória de cálculo:
+    #   Referência: a foz do rio São Francisco, na divisa AL/SE,
+    #   aprox. lon -36.395, lat -10.505 (entre Piaçabuçu-AL e
+    #   Brejo Grande-SE). O oceano fica a SE da foz e o rio chega
+    #   de NW, então o quadrado é centrado próximo à foz, com o
+    #   quadrante SE sobre o oceano.
+    #   Na latitude ~-10.5:
+    #     1 grau de latitude  ≈ 110.60 km  ->  40 km ≈ 0.362 graus
+    #     1 grau de longitude ≈ 111.32 x cos(10.5 graus) ≈ 109.46 km
+    #                                          ->  40 km ≈ 0.365 graus
+    #   Longitude: -36.58 a -36.215 (delta 0.365 graus ≈ 40.0 km),
+    #     do baixo curso perto de Piaçabuçu até ~18 km mar adentro.
+    #   Latitude: -10.70 a -10.34 (delta 0.36 graus ≈ 39.8 km),
+    #     cobrindo delta, bancos de areia e a planície costeira das
+    #     duas margens (Pontal do Peba-AL ao litoral de Pacatuba-SE).
+    bbox: [-36.58, -10.70, -36.215, -10.34]
+
+    # Litoral AL/SE: a estação chuvosa vai de ~abril a agosto (chuvas
+    # de outono-inverno); a estação seca vai de ~outubro a março, com
+    # núcleo mais seco de novembro a janeiro. Em 2026-08-16, a janela
+    # de 3 meses mais recente contida no núcleo seco é nov/2025 a
+    # jan/2026. data_final é exclusiva.
+    data_inicial: "2025-11-01"
+    data_final: "2026-02-01"
+
+    nuvem_max: 20
+    estic_cor_verdadeira: [0, 2500]
+
+  tres-marias:
+    # bbox em WGS84 (EPSG:4326), ordem [oeste, sul, leste, norte].
+    #
+    # Memória de cálculo:
+    #   Referência: barragem de Três Marias, alto São Francisco-MG,
+    #   aprox. lon -45.264, lat -18.214. O reservatório se estende da
+    #   barragem para S/SW por mais de 40 km, então um recorte de
+    #   40x40 km não cobre o reservatório inteiro: o quadrado é
+    #   centrado no corpo d'água principal (porção norte-central),
+    #   incluindo a barragem na borda norte e os braços dos rios
+    #   Borrachudo e Indaiá a oeste; os braços ao sul (região de
+    #   Morada Nova de Minas/Pompéu) ficam parcialmente fora.
+    #   Na latitude ~-18.4:
+    #     1 grau de latitude  ≈ 110.60 km  ->  40 km ≈ 0.362 graus
+    #     1 grau de longitude ≈ 111.32 x cos(18.4 graus) ≈ 105.63 km
+    #                                          ->  40 km ≈ 0.379 graus
+    #   Longitude: -45.59 a -45.21 (delta 0.38 graus ≈ 40.1 km).
+    #   Latitude: -18.57 a -18.21 (delta 0.36 graus ≈ 39.8 km).
+    bbox: [-45.59, -18.57, -45.21, -18.21]
+
+    # Centro-oeste de MG: regime distinto do litoral do Nordeste —
+    # estação chuvosa de ~outubro a março e estação seca de ~maio a
+    # setembro. Em 2026-08-16, a janela de 3 meses mais recente
+    # completa e contida na estação seca é mai-jul/2026 (jun-ago
+    # ainda não fechou). data_final é exclusiva.
+    data_inicial: "2026-05-01"
+    data_final: "2026-08-01"
+
+    nuvem_max: 20
+    estic_cor_verdadeira: [0, 2500]
+
+  barragem-salinas:
+    # bbox em WGS84 (EPSG:4326), ordem [oeste, sul, leste, norte].
+    #
+    # Memória de cálculo:
+    #   Corpo d'água localizado ANTES de definir o bbox, via
+    #   OpenStreetMap/Overpass API (consulta em 2026-08-16):
+    #   way 298415728, nome "Barragem de Salinas", centroide
+    #   (-16.085, -42.262), polígono de ~10.8 km2 entre
+    #   lon -42.304..-42.232 e lat -16.115..-16.051, ~10 km ao
+    #   norte da cidade de Salinas-MG. Nome oficial do barramento:
+    #   Barragem do Rio Salinas (CEMIG, anos 1990, perenização do
+    #   rio Salinas e abastecimento; fontes: salinas.mg.gov.br e
+    #   minasgerais.com.br). Escolhido pelo usuário entre 4
+    #   candidatos (era o maior e o único compatível com o
+    #   "principal reservatório do município").
+    #   Recorte de ~20x20 km (menor que o padrão de 40 km porque o
+    #   reservatório é pequeno), centrado no centroide do polígono.
+    #   Na latitude ~-16.08:
+    #     1 grau de latitude  ≈ 110.60 km  ->  20 km ≈ 0.181 graus
+    #     1 grau de longitude ≈ 111.32 x cos(16.08 graus) ≈ 106.98 km
+    #                                          ->  20 km ≈ 0.187 graus
+    #   Longitude: -42.360 a -42.173 (delta 0.187 ≈ 20.0 km).
+    #   Latitude: -16.174 a -15.993 (delta 0.181 ≈ 20.0 km).
+    #   Fuso UTM (verificação na divisa 23/24): a zona 24 começa em
+    #   -42.000; a borda LESTE do bbox (-42.173) ainda está a oeste
+    #   de -42.000, logo o bbox inteiro cai na zona 23. Centro
+    #   lon -42.2665 -> fuso = floor((180-42.2665)/6)+1 = 23 ->
+    #   SIRGAS 2000 / UTM 23S (EPSG:31983), o mesmo de Três Marias
+    #   e diferente do 24S de Fortaleza/foz.
+    bbox: [-42.360, -16.174, -42.173, -15.993]
+
+    # Norte de Minas (semiárido): estação chuvosa de ~outubro a
+    # março e estação seca de ~abril a setembro. Em 2026-08-16, a
+    # janela de 3 meses mais recente completa e contida na estação
+    # seca é mai-jul/2026. data_final é exclusiva.
+    data_inicial: "2026-05-01"
+    data_final: "2026-08-01"
+
+    nuvem_max: 20
+    estic_cor_verdadeira: [0, 2500]
