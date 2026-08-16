@@ -17,6 +17,34 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
+<style>
+/* Home visual: abertura em imagem, texto na coluna de 680px */
+main { max-width: none; padding-inline: 0; }
+main .col { max-width: 680px; margin-inline: auto; padding-inline: 24px; }
+
+.abertura { position: relative; min-height: 84vh; min-height: 88svh; display: flex; align-items: flex-end; background: #14211c; margin-top: 24px; }
+.abertura > picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.abertura-texto {
+  position: relative; width: 100%;
+  background: linear-gradient(to top, rgba(8, 18, 14, 0.88) 0%, rgba(8, 18, 14, 0.62) 55%, rgba(8, 18, 14, 0) 100%);
+  padding-top: 112px;
+}
+.abertura-texto .col { padding-bottom: 40px; }
+.abertura h1 { color: #fafafa; margin-top: 0; }
+.abertura-nota { color: #fafafa; font-size: 15px; font-weight: 400; margin-top: 16px; }
+
+.competencias { list-style: none; }
+.competencias li { margin-top: 40px; }
+.competencias h2 { margin-top: 0; }
+.competencias li:first-child h2 { font-size: 26px; }
+.competencias p { margin-top: 8px; }
+
+.trabalho { margin-top: 40px; }
+.trabalho picture img { display: block; width: 100%; height: auto; }
+.trabalho h3 { color: #1B4D3E; font-size: 17px; font-weight: 700; margin-top: 16px; }
+
+.destaque { font-size: 21px; font-weight: 700; line-height: 1.35; color: #1B4D3E; margin-top: 64px; }
+</style>
 </head>
 <body>
 <header>
@@ -31,26 +59,61 @@
   </nav>
 </header>
 <main>
-  <h1>Ferramentas para quem coleta e analisa dado territorial</h1>
+  <section class="abertura">
+    <picture>
+      <source type="image/avif" sizes="100vw" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.avif 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.avif 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.avif 1600w">
+      <img src="/sensoriamento/img/foz-sao-francisco_cor_1000.webp" sizes="100vw" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.webp 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.webp 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.webp 1600w" width="1600" height="1595" fetchpriority="high" alt="Composição Sentinel-2 em cor verdadeira da foz do rio São Francisco: o rio desce do noroeste, a pluma de sedimentos entra no oceano e as dunas claras acompanham a costa">
+    </picture>
+    <div class="abertura-texto">
+      <div class="col">
+        <h1>Ferramentas para quem coleta e analisa dado territorial</h1>
+        <p class="abertura-nota">Imagem processada por mim, a partir de dados públicos.</p>
+      </div>
+    </div>
+  </section>
 
-  <p>Trabalho com dado geoespacial de ponta a ponta: coleta em campo, tratamento, análise e publicação. Atendo organizações que produzem dado territorial e precisam de ferramentas próprias para isso.</p>
+  <div class="col">
+    <p>Trabalho com dado geoespacial de ponta a ponta: coleta em campo, tratamento, análise e publicação. Atendo organizações que produzem dado territorial e precisam de ferramentas próprias para isso.</p>
 
-  <ul class="lista-inline">
-    <li>Aplicativos de coleta em campo</li>
-    <li>Análise geoespacial e sensoriamento remoto</li>
-    <li>Mapas e sistemas web</li>
-    <li>Tratamento e estruturação de dado</li>
-  </ul>
+    <ul class="competencias">
+      <li>
+        <h2>Sensoriamento remoto e análise geoespacial</h2>
+        <p>Processamento de séries Sentinel-2 e Landsat, índices espectrais, composições temporais e detecção de mudanças.</p>
+      </li>
+      <li>
+        <h2>Aplicativos de coleta em campo</h2>
+        <p>Registro georreferenciado, funcionamento sem conectividade e exportação em formatos oficiais.</p>
+      </li>
+      <li>
+        <h2>Tratamento e publicação de dado</h2>
+        <p>Estruturação de bases geoespaciais e sistemas web para o resultado chegar a quem precisa dele.</p>
+      </li>
+    </ul>
 
-  <h2>Fonte, método e alcance, sempre declarados.</h2>
+    <h2>Fonte, método e alcance, sempre declarados.</h2>
 
-  <!-- Imagem de prévia do mapa entrará aqui, acima do título do artefato. -->
-  <p class="artefato-titulo"><a href="/acesso-saude-bh/">Mapa de acesso à saúde, Belo Horizonte</a></p>
-  <p class="artefato-desc">5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.</p>
+    <div class="trabalho">
+      <a href="/sensoriamento/">
+        <picture>
+          <source type="image/avif" sizes="(max-width: 728px) 100vw, 680px" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.avif 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.avif 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.avif 1600w">
+          <img src="/sensoriamento/img/foz-sao-francisco_cor_1000.webp" sizes="(max-width: 728px) 100vw, 680px" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.webp 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.webp 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.webp 1600w" width="1600" height="1595" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira da foz do rio São Francisco, com o delta, os bancos de areia e o oceano">
+        </picture>
+      </a>
+      <h3><a href="/sensoriamento/">Quatro cenas, um pipeline</a></h3>
+      <p class="artefato-desc">72 imagens Sentinel-2, quatro geografias, o mesmo script.</p>
+    </div>
 
-  <p>Venho da engenharia florestal e da análise e modelagem de sistemas ambientais. Essa formação me deixou atento à origem do dado e ao que ele sustenta.</p>
+    <div class="trabalho">
+      <!-- Imagem de prévia do mapa entrará aqui, acima do título do artefato. -->
+      <h3><a href="/acesso-saude-bh/">Mapa de acesso à saúde, Belo Horizonte</a></h3>
+      <p class="artefato-desc">5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.</p>
+    </div>
 
-  <h2>Fale comigo pelo <a href="https://wa.me/5531975097001">WhatsApp</a> ou por <a href="mailto:hugo@meridianotecnologia.com.br">e-mail</a>.</h2>
+    <p>Venho da engenharia florestal e da análise e modelagem de sistemas ambientais. Essa formação me deixou atento à origem do dado e ao que ele sustenta.</p>
+    <p class="apoio"><a href="/sobre.html">Sobre mim</a></p>
+
+    <p class="destaque">Fale comigo pelo <a href="https://wa.me/5531975097001">WhatsApp</a> ou por <a href="mailto:hugo@meridianotecnologia.com.br">e-mail</a>.</p>
+  </div>
 </main>
 <footer>
   <p>Meridiano Tecnologia · Belo Horizonte, MG · 2026</p>

@@ -4,19 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trabalhos · Meridiano Tecnologia</title>
-<meta name="description" content="Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.">
+<meta name="description" content="Quatro cenas, um pipeline: 72 imagens Sentinel-2 em quatro geografias. Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários e 155 unidades de saúde.">
 <meta property="og:title" content="Trabalhos · Meridiano Tecnologia">
-<meta property="og:description" content="Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.">
+<meta property="og:description" content="Quatro cenas, um pipeline: 72 imagens Sentinel-2 em quatro geografias. Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários e 155 unidades de saúde.">
 <meta property="og:image" content="https://meridianotecnologia.com.br/assets/img/og.png">
 <meta property="og:url" content="https://meridianotecnologia.com.br/trabalhos.html">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Trabalhos · Meridiano Tecnologia">
-<meta name="twitter:description" content="Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.">
+<meta name="twitter:description" content="Quatro cenas, um pipeline: 72 imagens Sentinel-2 em quatro geografias. Mapa de acesso à saúde, Belo Horizonte: 5.166 setores censitários e 155 unidades de saúde.">
 <meta name="twitter:image" content="https://meridianotecnologia.com.br/assets/img/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
+<style>
+.trabalho { margin-top: 40px; }
+.trabalho picture img { display: block; width: 100%; height: auto; }
+.trabalho h2 { font-size: 17px; margin-top: 16px; }
+</style>
 </head>
 <body>
 <header>
@@ -33,9 +38,22 @@
 <main>
   <h1>Trabalhos</h1>
 
-  <!-- Imagem de prévia do mapa entrará aqui, acima do título do artefato. -->
-  <p class="artefato-titulo"><a href="/acesso-saude-bh/">Mapa de acesso à saúde, Belo Horizonte</a></p>
-  <p class="artefato-desc">5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.</p>
+  <div class="trabalho">
+    <a href="/sensoriamento/">
+      <picture>
+        <source type="image/avif" sizes="(max-width: 728px) 100vw, 680px" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.avif 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.avif 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.avif 1600w">
+        <img src="/sensoriamento/img/foz-sao-francisco_cor_1000.webp" sizes="(max-width: 728px) 100vw, 680px" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.webp 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.webp 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.webp 1600w" width="1600" height="1595" alt="Composição Sentinel-2 em cor verdadeira da foz do rio São Francisco, com o delta, os bancos de areia e o oceano">
+      </picture>
+    </a>
+    <h2><a href="/sensoriamento/">Quatro cenas, um pipeline</a></h2>
+    <p class="artefato-desc">72 imagens Sentinel-2, quatro geografias, o mesmo script.</p>
+  </div>
+
+  <div class="trabalho">
+    <!-- Imagem de prévia do mapa entrará aqui, acima do título do artefato. -->
+    <h2><a href="/acesso-saude-bh/">Mapa de acesso à saúde, Belo Horizonte</a></h2>
+    <p class="artefato-desc">5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.</p>
+  </div>
 
   <p>Esta página cresce conforme os projetos fecham.</p>
 </main>
