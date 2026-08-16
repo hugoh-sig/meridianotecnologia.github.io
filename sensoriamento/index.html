@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quatro cenas, um pipeline · Meridiano Tecnologia</title>
+<meta name="description" content="Composições Sentinel-2 de Fortaleza, foz do São Francisco, Três Marias e Barragem do Rio Salinas, processadas pelo mesmo pipeline: cor verdadeira, NDVI e MNDWI, com método e procedência declarados.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 400 700;
+  font-display: swap;
+  src: url('fonts/inter-variable-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 400 700;
+  font-display: swap;
+  src: url('fonts/inter-variable-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #fafafa;
+  color: #111816;
+  font: 400 17px/1.65 'Inter', system-ui, sans-serif;
+}
+
+/* Texto na coluna de 680px; as imagens rompem a coluna */
+.col { max-width: 680px; margin-inline: auto; padding-inline: 24px; }
+
+a { color: #1B4D3E; text-decoration: underline; text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid #1B4D3E; outline-offset: 2px; }
+
+header.col {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 16px 32px; padding-top: 32px;
+}
+.marca {
+  display: flex; align-items: center; gap: 8px;
+  color: #1B4D3E; text-decoration: none;
+  font-weight: 500; font-size: 15px; letter-spacing: 2px; white-space: nowrap;
+}
+.marca svg { width: 32px; height: 32px; flex: none; }
+
+h1 { color: #1B4D3E; font-size: 34px; font-weight: 700; line-height: 1.25; margin-top: 64px; }
+
+/* Abertura em tela cheia: mesma imagem da cena de Fortaleza (mesma URL,
+   uma só requisição), texto sobreposto na base com gradiente para AA */
+.abertura { position: relative; min-height: 88vh; min-height: 92svh; display: flex; align-items: flex-end; background: #14211c; }
+.abertura > picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.abertura-texto {
+  position: relative; width: 100%;
+  background: linear-gradient(to top, rgba(8, 18, 14, 0.88) 0%, rgba(8, 18, 14, 0.62) 55%, rgba(8, 18, 14, 0) 100%);
+  padding-top: 112px;
+}
+.abertura-texto .col { padding-bottom: 40px; }
+.abertura h1 { color: #fafafa; margin-top: 0; }
+.abertura p { color: #fafafa; }
+h2 { color: #1B4D3E; font-size: 21px; font-weight: 700; line-height: 1.35; margin-top: 64px; }
+h3 { color: #1B4D3E; font-size: 17px; font-weight: 700; margin-top: 32px; }
+p, ul, ol { margin-top: 24px; }
+li { margin-top: 8px; }
+.apoio { font-size: 15px; }
+
+.numeros {
+  display: flex; flex-wrap: wrap; gap: 8px 32px;
+  margin-top: 32px; font-size: 21px; font-weight: 700; color: #1B4D3E;
+  list-style: none;
+}
+.numeros li { margin-top: 0; }
+
+/* Pilha de camadas em largura total */
+figure.cena { margin-top: 24px; }
+.pilha {
+  position: relative; width: 100%; max-width: 1600px; margin-inline: auto;
+  background: #e8e8e6;
+}
+.camada { position: absolute; inset: 0; opacity: 0; transition: opacity 400ms ease; }
+.camada.ativa { opacity: 1; }
+.camada img { display: block; width: 100%; height: 100%; }
+@media (prefers-reduced-motion: reduce) { .camada { transition: none; } }
+
+.controles { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+.controles button {
+  font: 500 15px/1 'Inter', system-ui, sans-serif;
+  color: #1B4D3E; background: #fafafa;
+  border: 2px solid #1B4D3E; border-radius: 999px;
+  padding: 10px 18px; cursor: pointer;
+}
+.controles button[aria-pressed="true"] { background: #1B4D3E; color: #fafafa; }
+
+figcaption { margin-top: 16px; font-size: 15px; }
+.legenda[hidden] { display: none; }
+.barra {
+  height: 14px; border-radius: 4px; margin-top: 8px;
+  border: 1px solid #d5d5d2;
+}
+.barra-ndvi {
+  background: linear-gradient(to right, #f1f5e6 0%, #cad5c1 16.7%, #a3b69e 33.3%,
+    #7e977c 50%, #5b7a5b 66.7%, #385d3c 83.3%, #14421f 100%);
+}
+.barra-mndwi {
+  background: linear-gradient(to right, #5a4632 0%, #7e6c5b 13.9%, #a39688 27.8%,
+    #c9c1b7 41.7%, #f0eee8 54.4%, #e8e8e6 55.6%, #d8e6f2 56.7%, #a7b8cf 66.7%,
+    #778cad 77.8%, #48638b 88.9%, #0a3d6b 100%);
+}
+.barra-rotulos { display: flex; justify-content: space-between; font-size: 13px; margin-top: 4px; }
+
+/* Cada cena lê como unidade: 96px entre blocos, 32px da imagem às métricas */
+.cena-titulo { margin-top: 96px; }
+.metricas { list-style: none; display: flex; flex-wrap: wrap; gap: 16px 32px; margin-top: 32px; }
+.metricas li { display: flex; flex-direction: column-reverse; margin-top: 0; }
+.metricas .valor { font-size: 21px; font-weight: 700; }
+.metricas .rotulo { font-size: 15px; color: #1B4D3E; }
+
+/* Série do perímetro de Fortaleza nas quatro escalas */
+.serie { list-style: none; display: flex; flex-wrap: wrap; gap: 24px 48px; margin-top: 32px; }
+.serie li { display: flex; flex-direction: column; margin-top: 0; }
+.serie .valor { font-size: 28px; font-weight: 700; line-height: 1.2; }
+.serie .rotulo { font-size: 15px; color: #1B4D3E; }
+
+/* Tabela comparativa */
+.rolagem { overflow-x: auto; margin-top: 24px; }
+table { border-collapse: collapse; font-size: 15px; min-width: 640px; width: 100%; }
+caption { text-align: left; font-weight: 700; color: #1B4D3E; padding-bottom: 8px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #d5d5d2; vertical-align: top; }
+thead th { background: #1B4D3E; color: #fafafa; }
+tbody th { color: #1B4D3E; font-weight: 500; }
+td, thead th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+
+code { font-size: 15px; background: #efefec; padding: 1px 5px; border-radius: 4px; }
+
+footer { margin-top: 64px; padding-block: 32px; font-size: 15px; border-top: 1px solid #d5d5d2; }
+main { padding-bottom: 32px; }
+</style>
+</head>
+<body>
+<header class="col">
+  <a class="marca" href="/">
+    <svg viewBox="-60 -60 120 120" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><circle cx="0" cy="0" r="50"/><path d="M0,-50 A28,50 0 0,0 0,50"/><path d="M0,-50 L0,50"/><path d="M0,0 L34,-34"/><path d="M0,0 L48,0"/><path d="M0,0 L34,34"/></g><g fill="currentColor"><circle cx="34" cy="-34" r="6"/><circle cx="48" cy="0" r="8"/><circle cx="34" cy="34" r="6"/><circle cx="0" cy="0" r="9"/></g></svg>
+    <span>MERIDIANO TECNOLOGIA</span>
+  </a>
+</header>
+
+<main>
+  <section class="abertura">
+    <picture>
+      <source type="image/avif" sizes="100vw" srcset="img/fortaleza_cor_600.avif 600w, img/fortaleza_cor_1000.avif 1000w, img/fortaleza_cor_1600.avif 1600w">
+      <img src="img/fortaleza_cor_1000.webp" sizes="100vw" srcset="img/fortaleza_cor_600.webp 600w, img/fortaleza_cor_1000.webp 1000w, img/fortaleza_cor_1600.webp 1600w" width="1600" height="1593" fetchpriority="high" alt="">
+    </picture>
+    <div class="abertura-texto">
+      <div class="col">
+        <h1>Quatro cenas, um pipeline</h1>
+        <p>Composições Sentinel-2 de quatro geografias brasileiras, todas processadas pelo mesmo script: a costa urbana de Fortaleza, a foz do rio São Francisco, o reservatório de Três Marias e o açude da Barragem do Rio Salinas. Para cada cena, três leituras do mesmo território: cor verdadeira, vegetação (NDVI) e água (MNDWI).</p>
+      </div>
+    </div>
+  </section>
+  <div class="col">
+    <ul class="numeros" aria-label="Números do projeto">
+      <li>4 cenas</li>
+      <li>72 imagens Sentinel-2</li>
+      <li>1 pipeline</li>
+    </ul>
+  </div>
+
+  <!-- ========================= FORTALEZA ========================= -->
+  <div class="col">
+    <h2 id="fortaleza" class="cena-titulo">Fortaleza, Ceará</h2>
+    <p>Recorte de 40 por 40 km sobre a capital cearense: a mancha urbana ao sul, a linha de costa e o oceano Atlântico ao norte. Composição da estação seca de 2025.</p>
+  </div>
+  <figure class="cena" data-cena="fortaleza">
+    <div class="pilha" style="aspect-ratio: 1600 / 1593">
+      <div class="camada ativa" data-camada="cor" aria-hidden="false">
+        <picture>
+          <source type="image/avif" sizes="100vw" srcset="img/fortaleza_cor_600.avif 600w, img/fortaleza_cor_1000.avif 1000w, img/fortaleza_cor_1600.avif 1600w">
+          <img src="img/fortaleza_cor_1000.webp" sizes="100vw" srcset="img/fortaleza_cor_600.webp 600w, img/fortaleza_cor_1000.webp 1000w, img/fortaleza_cor_1600.webp 1600w" width="1600" height="1593" alt="Composição Sentinel-2 em cor verdadeira de Fortaleza: a mancha urbana em tons de ocre ao sul, a linha de costa com o porto do Mucuripe e o oceano Atlântico em azul ao norte">
+        </picture>
+      </div>
+      <div class="camada" data-camada="ndvi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/fortaleza_ndvi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/fortaleza_ndvi_1600.webp" width="1600" height="1593" alt="Camada NDVI de Fortaleza: vegetação em tons de verde, do claro ao escuro conforme a densidade; a área urbana quase sem verde e o oceano em cinza neutro">
+        </picture>
+      </div>
+      <div class="camada" data-camada="mndwi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/fortaleza_mndwi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/fortaleza_mndwi_1600.webp" width="1600" height="1593" alt="Camada MNDWI de Fortaleza: o oceano e os corpos d'água em azul, o continente em tons claros de bege">
+        </picture>
+      </div>
+    </div>
+    <div class="col">
+      <div class="controles" hidden>
+        <button type="button" aria-pressed="true" data-alvo="cor">Cor verdadeira</button>
+        <button type="button" aria-pressed="false" data-alvo="ndvi">NDVI</button>
+        <button type="button" aria-pressed="false" data-alvo="mndwi">MNDWI</button>
+      </div>
+      <figcaption>
+        <div class="legenda" data-camada="cor">Cor verdadeira (bandas B4, B3, B2) com realce de exibição declarado na ficha técnica.</div>
+        <div class="legenda" data-camada="ndvi" hidden>
+          NDVI, de 0,0 (vegetação ausente) a 0,9 (vegetação densa). Cinza: água e valores abaixo de zero, onde o índice não é interpretável.
+          <div class="barra barra-ndvi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>0,0</span><span>0,45</span><span>0,9</span></div>
+        </div>
+        <div class="legenda" data-camada="mndwi" hidden>
+          MNDWI, de menos 1 (terra seca) a 0,8 (água), com ponto neutro no limiar terra e água em 0.
+          <div class="barra barra-mndwi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>&minus;1 terra</span><span>0</span><span>0,8 água</span></div>
+        </div>
+      </figcaption>
+    </div>
+  </figure>
+  <div class="col">
+    <ul class="metricas">
+      <li><span class="valor">860,2 km²</span><span class="rotulo">Área de água</span></li>
+      <li><span class="valor">731,7 km²</span><span class="rotulo">Área de continente</span></li>
+      <li><span class="valor">0,286</span><span class="rotulo">NDVI mediano no continente</span></li>
+      <li><span class="valor">outubro a dezembro de 2025</span><span class="rotulo">Período da composição</span></li>
+      <li><span class="valor">23</span><span class="rotulo">Imagens na composição</span></li>
+    </ul>
+    <p class="apoio"><a href="fichas/fortaleza.md">Ficha técnica completa de Fortaleza</a></p>
+  </div>
+
+  <!-- ==================== FOZ DO SÃO FRANCISCO ==================== -->
+  <div class="col">
+    <h2 id="foz-sao-francisco" class="cena-titulo">Foz do São Francisco, divisa de Alagoas e Sergipe</h2>
+    <p>Recorte de 40 por 40 km sobre o encontro do rio com o mar: o delta, os bancos de areia, as dunas do Pontal do Peba e a planície costeira das duas margens. Composição do núcleo seco de 2025 e 2026.</p>
+  </div>
+  <figure class="cena" data-cena="foz-sao-francisco">
+    <div class="pilha" style="aspect-ratio: 1600 / 1595">
+      <div class="camada ativa" data-camada="cor" aria-hidden="false">
+        <picture>
+          <source type="image/avif" sizes="100vw" srcset="img/foz-sao-francisco_cor_600.avif 600w, img/foz-sao-francisco_cor_1000.avif 1000w, img/foz-sao-francisco_cor_1600.avif 1600w">
+          <img src="img/foz-sao-francisco_cor_1000.webp" sizes="100vw" srcset="img/foz-sao-francisco_cor_600.webp 600w, img/foz-sao-francisco_cor_1000.webp 1000w, img/foz-sao-francisco_cor_1600.webp 1600w" width="1600" height="1595" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira da foz do rio São Francisco: o rio desce do noroeste, a pluma de sedimentos entra no oceano e as dunas claras do Pontal do Peba acompanham a costa">
+        </picture>
+      </div>
+      <div class="camada" data-camada="ndvi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/foz-sao-francisco_ndvi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/foz-sao-francisco_ndvi_1600.webp" width="1600" height="1595" loading="lazy" alt="Camada NDVI da foz do São Francisco: matas e coqueirais em verde escuro, dunas e areias em verde muito claro, rio e oceano em cinza neutro">
+        </picture>
+      </div>
+      <div class="camada" data-camada="mndwi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/foz-sao-francisco_mndwi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/foz-sao-francisco_mndwi_1600.webp" width="1600" height="1595" loading="lazy" alt="Camada MNDWI da foz do São Francisco: rio, estuário e oceano em azul, planície costeira e dunas em tons claros de bege">
+        </picture>
+      </div>
+    </div>
+    <div class="col">
+      <div class="controles" hidden>
+        <button type="button" aria-pressed="true" data-alvo="cor">Cor verdadeira</button>
+        <button type="button" aria-pressed="false" data-alvo="ndvi">NDVI</button>
+        <button type="button" aria-pressed="false" data-alvo="mndwi">MNDWI</button>
+      </div>
+      <figcaption>
+        <div class="legenda" data-camada="cor">Cor verdadeira (bandas B4, B3, B2) com realce de exibição declarado na ficha técnica.</div>
+        <div class="legenda" data-camada="ndvi" hidden>
+          NDVI, de 0,0 (vegetação ausente) a 0,9 (vegetação densa). Cinza: água e valores abaixo de zero, onde o índice não é interpretável.
+          <div class="barra barra-ndvi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>0,0</span><span>0,45</span><span>0,9</span></div>
+        </div>
+        <div class="legenda" data-camada="mndwi" hidden>
+          MNDWI, de menos 1 (terra seca) a 0,8 (água), com ponto neutro no limiar terra e água em 0.
+          <div class="barra barra-mndwi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>&minus;1 terra</span><span>0</span><span>0,8 água</span></div>
+        </div>
+      </figcaption>
+    </div>
+  </figure>
+  <div class="col">
+    <ul class="metricas">
+      <li><span class="valor">1.121,5 km²</span><span class="rotulo">Área de água</span></li>
+      <li><span class="valor">499,0 km²</span><span class="rotulo">Área de continente</span></li>
+      <li><span class="valor">0,514</span><span class="rotulo">NDVI mediano no continente</span></li>
+      <li><span class="valor">novembro de 2025 a janeiro de 2026</span><span class="rotulo">Período da composição</span></li>
+      <li><span class="valor">24</span><span class="rotulo">Imagens na composição</span></li>
+    </ul>
+    <p class="apoio"><a href="fichas/foz-sao-francisco.md">Ficha técnica completa da foz do São Francisco</a></p>
+  </div>
+
+  <!-- ======================== TRÊS MARIAS ======================== -->
+  <div class="col">
+    <h2 id="tres-marias" class="cena-titulo">Reservatório de Três Marias, Minas Gerais</h2>
+    <p>Recorte de 40 por 40 km sobre o corpo principal do reservatório, no alto São Francisco: os braços dendríticos, os pivôs de irrigação e o cerrado do entorno no inverno seco. Composição da estação seca de 2026.</p>
+  </div>
+  <figure class="cena" data-cena="tres-marias">
+    <div class="pilha" style="aspect-ratio: 1600 / 1588">
+      <div class="camada ativa" data-camada="cor" aria-hidden="false">
+        <picture>
+          <source type="image/avif" sizes="100vw" srcset="img/tres-marias_cor_600.avif 600w, img/tres-marias_cor_1000.avif 1000w, img/tres-marias_cor_1600.avif 1600w">
+          <img src="img/tres-marias_cor_1000.webp" sizes="100vw" srcset="img/tres-marias_cor_600.webp 600w, img/tres-marias_cor_1000.webp 1000w, img/tres-marias_cor_1600.webp 1600w" width="1600" height="1588" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira do reservatório de Três Marias: a água escura em braços dendríticos, círculos de pivôs de irrigação e o cerrado seco em tons de marrom">
+        </picture>
+      </div>
+      <div class="camada" data-camada="ndvi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/tres-marias_ndvi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/tres-marias_ndvi_1600.webp" width="1600" height="1588" loading="lazy" alt="Camada NDVI de Três Marias: pivôs irrigados e matas ciliares em verde escuro, pastagens secas em verde claro, o reservatório em cinza neutro">
+        </picture>
+      </div>
+      <div class="camada" data-camada="mndwi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/tres-marias_mndwi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/tres-marias_mndwi_1600.webp" width="1600" height="1588" loading="lazy" alt="Camada MNDWI de Três Marias: o reservatório e seus braços em azul, o entorno seco em tons claros de bege">
+        </picture>
+      </div>
+    </div>
+    <div class="col">
+      <div class="controles" hidden>
+        <button type="button" aria-pressed="true" data-alvo="cor">Cor verdadeira</button>
+        <button type="button" aria-pressed="false" data-alvo="ndvi">NDVI</button>
+        <button type="button" aria-pressed="false" data-alvo="mndwi">MNDWI</button>
+      </div>
+      <figcaption>
+        <div class="legenda" data-camada="cor">Cor verdadeira (bandas B4, B3, B2) com realce de exibição declarado na ficha técnica.</div>
+        <div class="legenda" data-camada="ndvi" hidden>
+          NDVI, de 0,0 (vegetação ausente) a 0,9 (vegetação densa). Cinza: água e valores abaixo de zero, onde o índice não é interpretável.
+          <div class="barra barra-ndvi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>0,0</span><span>0,45</span><span>0,9</span></div>
+        </div>
+        <div class="legenda" data-camada="mndwi" hidden>
+          MNDWI, de menos 1 (terra seca) a 0,8 (água), com ponto neutro no limiar terra e água em 0.
+          <div class="barra barra-mndwi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>&minus;1 terra</span><span>0</span><span>0,8 água</span></div>
+        </div>
+      </figcaption>
+    </div>
+  </figure>
+  <div class="col">
+    <ul class="metricas">
+      <li><span class="valor">451,2 km²</span><span class="rotulo">Área de água</span></li>
+      <li><span class="valor">1.155,6 km²</span><span class="rotulo">Área de continente</span></li>
+      <li><span class="valor">0,541</span><span class="rotulo">NDVI mediano no continente</span></li>
+      <li><span class="valor">maio a julho de 2026</span><span class="rotulo">Período da composição</span></li>
+      <li><span class="valor">13</span><span class="rotulo">Imagens na composição</span></li>
+    </ul>
+    <p class="apoio"><a href="fichas/tres-marias.md">Ficha técnica completa de Três Marias</a></p>
+  </div>
+
+  <!-- ==================== BARRAGEM DO RIO SALINAS ==================== -->
+  <div class="col">
+    <h2 id="barragem-salinas" class="cena-titulo">Barragem do Rio Salinas, Salinas, Minas Gerais</h2>
+    <p>Recorte menor, de 20 por 20 km, porque o corpo d'água é pequeno: o açude construído pela CEMIG nos anos 1990 para perenizar o rio Salinas, 10 km ao norte da cidade, no semiárido do norte de Minas. Composição da estação seca de 2026.</p>
+  </div>
+  <figure class="cena" data-cena="barragem-salinas">
+    <div class="pilha" style="aspect-ratio: 1600 / 1602">
+      <div class="camada ativa" data-camada="cor" aria-hidden="false">
+        <picture>
+          <source type="image/avif" sizes="100vw" srcset="img/barragem-salinas_cor_600.avif 600w, img/barragem-salinas_cor_1000.avif 1000w, img/barragem-salinas_cor_1600.avif 1600w">
+          <img src="img/barragem-salinas_cor_1000.webp" sizes="100vw" srcset="img/barragem-salinas_cor_600.webp 600w, img/barragem-salinas_cor_1000.webp 1000w, img/barragem-salinas_cor_1600.webp 1600w" width="1600" height="1602" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira da Barragem do Rio Salinas: o reservatório dendrítico escuro no centro, a cidade de Salinas no canto sudoeste e o mosaico seco do semiárido em volta">
+        </picture>
+      </div>
+      <div class="camada" data-camada="ndvi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/barragem-salinas_ndvi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/barragem-salinas_ndvi_1600.webp" width="1600" height="1602" loading="lazy" alt="Camada NDVI da Barragem do Rio Salinas: matas em verde escuro, pastagens e caatinga seca em verde claro, o açude em cinza neutro">
+        </picture>
+      </div>
+      <div class="camada" data-camada="mndwi" aria-hidden="true">
+        <picture>
+          <source type="image/avif" data-srcset="img/barragem-salinas_mndwi_1600.avif">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" data-src="img/barragem-salinas_mndwi_1600.webp" width="1600" height="1602" loading="lazy" alt="Camada MNDWI da Barragem do Rio Salinas: o açude em azul no centro, o semiárido em tons claros de bege">
+        </picture>
+      </div>
+    </div>
+    <div class="col">
+      <div class="controles" hidden>
+        <button type="button" aria-pressed="true" data-alvo="cor">Cor verdadeira</button>
+        <button type="button" aria-pressed="false" data-alvo="ndvi">NDVI</button>
+        <button type="button" aria-pressed="false" data-alvo="mndwi">MNDWI</button>
+      </div>
+      <figcaption>
+        <div class="legenda" data-camada="cor">Cor verdadeira (bandas B4, B3, B2) com realce de exibição declarado na ficha técnica.</div>
+        <div class="legenda" data-camada="ndvi" hidden>
+          NDVI, de 0,0 (vegetação ausente) a 0,9 (vegetação densa). Cinza: água e valores abaixo de zero, onde o índice não é interpretável.
+          <div class="barra barra-ndvi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>0,0</span><span>0,45</span><span>0,9</span></div>
+        </div>
+        <div class="legenda" data-camada="mndwi" hidden>
+          MNDWI, de menos 1 (terra seca) a 0,8 (água), com ponto neutro no limiar terra e água em 0.
+          <div class="barra barra-mndwi" aria-hidden="true"></div>
+          <div class="barra-rotulos" aria-hidden="true"><span>&minus;1 terra</span><span>0</span><span>0,8 água</span></div>
+        </div>
+      </figcaption>
+    </div>
+  </figure>
+  <div class="col">
+    <ul class="metricas">
+      <li><span class="valor">8,4 km²</span><span class="rotulo">Área de água</span></li>
+      <li><span class="valor">404,1 km²</span><span class="rotulo">Área de continente</span></li>
+      <li><span class="valor">0,472</span><span class="rotulo">NDVI mediano no continente</span></li>
+      <li><span class="valor">maio a julho de 2026</span><span class="rotulo">Período da composição</span></li>
+      <li><span class="valor">12</span><span class="rotulo">Imagens na composição</span></li>
+    </ul>
+    <p class="apoio"><a href="fichas/barragem-salinas.md">Ficha técnica completa da Barragem do Rio Salinas</a></p>
+  </div>
+
+  <!-- ======================== COMPARATIVO ======================== -->
+  <div class="col">
+    <h2 id="comparativo">As quatro cenas lado a lado</h2>
+    <p><strong>As composições não são simultâneas.</strong> Cada coluna corresponde ao período indicado, escolhido pela estação seca de cada regime climático: as duas primeiras cenas são de 2025 e 2026, as duas últimas são de 2026. Os recortes também diferem: 40 km nas três primeiras, 20 km na última.</p>
+  </div>
+  <div class="col rolagem">
+    <table>
+      <caption>Métricas por cena, cada uma no seu período de composição</caption>
+      <thead>
+        <tr>
+          <th scope="col">Métrica</th>
+          <th scope="col">Fortaleza</th>
+          <th scope="col">Foz do São Francisco</th>
+          <th scope="col">Três Marias</th>
+          <th scope="col">Barragem de Salinas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Área de água</th>
+          <td>860,2 km²</td><td>1.121,5 km²</td><td>451,2 km²</td><td>8,4 km²</td>
+        </tr>
+        <tr>
+          <th scope="row">Área de continente</th>
+          <td>731,7 km²</td><td>499,0 km²</td><td>1.155,6 km²</td><td>404,1 km²</td>
+        </tr>
+        <tr>
+          <th scope="row">NDVI mediano no continente</th>
+          <td>0,286</td><td>0,514</td><td>0,541</td><td>0,472</td>
+        </tr>
+        <tr>
+          <th scope="row">Período da composição</th>
+          <td>out a dez de 2025</td><td>nov de 2025 a jan de 2026</td><td>mai a jul de 2026</td><td>mai a jul de 2026</td>
+        </tr>
+        <tr>
+          <th scope="row">Imagens na composição</th>
+          <td>23</td><td>24</td><td>13</td><td>12</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== A ESCALA DA MEDIDA ==================== -->
+  <div class="col">
+    <h2 id="escala">A medida depende da régua</h2>
+    <p>O perímetro de uma feição natural cresce conforme a resolução de medição aumenta: a mesma costa de Fortaleza dá quatro valores em quatro escalas. Por isso, toda medida de perímetro nesta página vem com a escala declarada.</p>
+    <ul class="serie" aria-label="Perímetro de Fortaleza em quatro escalas de medição">
+      <li><span class="valor">156,1 km</span><span class="rotulo">a 10 m</span></li>
+      <li><span class="valor">107,5 km</span><span class="rotulo">a 50 m</span></li>
+      <li><span class="valor">91,8 km</span><span class="rotulo">a 100 m</span></li>
+      <li><span class="valor">68,6 km</span><span class="rotulo">a 500 m</span></li>
+    </ul>
+  </div>
+
+  <!-- ==================== MÉTODO E PROCEDÊNCIA ==================== -->
+  <div class="col">
+    <h2 id="metodo">Método e procedência</h2>
+    <p>Todas as cenas saem do mesmo script, parametrizado por um arquivo de configuração: mudar de área é acrescentar uma entrada e rodar de novo.</p>
+
+    <h3>Fonte e máscara</h3>
+    <p>Coleção <code>COPERNICUS/S2_SR_HARMONIZED</code> do Google Earth Engine: Sentinel-2 nível 2A, refletância de superfície. Cada imagem passa pela máscara da banda <code>SCL</code>, que remove as classes 3 (sombra de nuvem), 8 (nuvem de probabilidade média), 9 (nuvem de probabilidade alta), 10 (cirrus fino) e 11 (neve). A composição é a mediana pixel a pixel das imagens restantes.</p>
+
+    <h3>Índices</h3>
+    <p>NDVI = (B8 &minus; B4) / (B8 + B4), com B8 no infravermelho próximo (842 nm) e B4 no vermelho (665 nm). MNDWI = (B3 &minus; B11) / (B3 + B11), com B3 no verde (560 nm) e B11 no infravermelho de ondas curtas (1610 nm), reamostrada de 20 m para 10 m por interpolação bilinear.</p>
+
+    <h3>Projeções</h3>
+    <p>Exportação em UTM SIRGAS 2000, com o fuso derivado do centro de cada recorte: fuso 24S (EPSG:31984) para Fortaleza e para a foz do São Francisco, fuso 23S (EPSG:31983) para Três Marias e para a Barragem do Rio Salinas, sempre a 10 m de resolução.</p>
+
+    <h3>Realce de exibição</h3>
+    <p>As imagens em cor verdadeira desta página têm realce de exibição, que serve à leitura visual e não substitui o dado. O realce aplica, sobre a base linear de refletância 0,00 a 0,25: esticamento linear entre os percentis 2 e 98 da distribuição conjunta das três bandas, calculados por cena (Fortaleza 38 a 255, foz do São Francisco 19 a 252, Três Marias 9 a 153, Barragem de Salinas 19 a 150, em valores de 8 bits); correção gama de 1,2; e saturação multiplicada por 1,15. Os dados originais, GeoTIFF e COG com esticamento declarado, permanecem intactos e com hash registrado na procedência de cada cena.</p>
+
+    <h3>Limitações comuns às quatro cenas</h3>
+    <ul>
+      <li>NDVI não é interpretável sobre água: os valores sobre oceano, rio e reservatório não medem vegetação.</li>
+      <li>A composição mediana não representa uma data específica: cada pixel pode vir de imagens diferentes dentro do período.</li>
+      <li>MNDWI confunde sombra e superfícies escuras com água: sombras residuais de nuvem, de relevo e de construções podem aparecer como água.</li>
+      <li>O contorno d'água medido (linha de costa ou perímetro de reservatório) depende da resolução de medição: o valor a 10 m não é comparável a medidas oficiais em outra escala.</li>
+      <li>A superfície de água corresponde à cota ou à maré do período composto de cada cena, não a um nível médio ou máximo.</li>
+    </ul>
+    <p class="apoio">Fichas técnicas completas, com memória de cálculo dos recortes, datas de todas as imagens, rampas de cor e hashes: nos links de cada cena acima.</p>
+  </div>
+</main>
+
+<footer class="col">
+  <p>Meridiano Tecnologia · Belo Horizonte, MG · 2026</p>
+  <p><a href="/">Página inicial</a> · <a href="/privacidade.html">Privacidade</a></p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  document.querySelectorAll('.controles').forEach(function (c) { c.hidden = false; });
+
+  document.querySelectorAll('figure.cena').forEach(function (cena) {
+    var botoes = cena.querySelectorAll('.controles button');
+    botoes.forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        var alvo = botao.dataset.alvo;
+        var camada = cena.querySelector('.camada[data-camada="' + alvo + '"]');
+        if (!camada) { return; }
+
+        function ativar() {
+          cena.querySelectorAll('.camada').forEach(function (el) {
+            var ativa = el === camada;
+            el.classList.toggle('ativa', ativa);
+            el.setAttribute('aria-hidden', ativa ? 'false' : 'true');
+          });
+          botoes.forEach(function (b) {
+            b.setAttribute('aria-pressed', b === botao ? 'true' : 'false');
+          });
+          cena.querySelectorAll('.legenda').forEach(function (l) {
+            l.hidden = l.dataset.camada !== alvo;
+          });
+        }
+
+        var img = camada.querySelector('img');
+        if (img && img.dataset.src) {
+          // Carregamento adiado: NDVI e MNDWI só baixam no primeiro clique
+          camada.querySelectorAll('source[data-srcset]').forEach(function (s) {
+            s.srcset = s.dataset.srcset;
+            s.removeAttribute('data-srcset');
+          });
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          if (img.decode) {
+            img.decode().then(ativar, ativar);
+          } else {
+            img.addEventListener('load', ativar, { once: true });
+          }
+        } else {
+          ativar();
+        }
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
