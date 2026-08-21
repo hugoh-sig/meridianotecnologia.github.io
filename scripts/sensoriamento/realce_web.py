@@ -93,12 +93,25 @@ STOPS_MNDWI_TERRA = stops_lab("#5a4632", "#f0eee8", [-1.0, -0.75, -0.50, -0.25, 
 NEUTRO_MNDWI = (0.0, hex_rgb("#e8e8e6"))
 STOPS_MNDWI_AGUA = stops_lab("#d8e6f2", "#0a3d6b", [0.02, 0.20, 0.40, 0.60, 0.80])
 
+# NBR: divergente com ponto médio neutro em 0; lado negativo (solo exposto,
+# área queimada, superfícies sem vegetação) em tons queimados
+# (escuro->claro), lado positivo (vegetação com dossel/umidade) em verdes
+# (claro->escuro), cada lado com luminosidade monotônica (CIELAB)
+STOPS_NBR_NEG = stops_lab("#7a2d0e", "#f4ede3", [-1.0, -0.75, -0.50, -0.25, -0.02])
+NEUTRO_NBR = (0.0, hex_rgb("#efeee9"))
+STOPS_NBR_POS = stops_lab("#e9f1e2", "#1a4d2e", [0.02, 0.20, 0.40, 0.60, 0.80])
+
 
 def rampa_entradas(nome):
     if nome == "ndvi":
         ent = [("-1.0", CINZA_NDVI), ("-0.0001", CINZA_NDVI)]
         ent += [(f"{v}", c) for v, c in STOPS_NDVI]
         ent.append(("1.0", STOPS_NDVI[-1][1]))
+    elif nome == "nbr":
+        ent = [(f"{v}", c) for v, c in STOPS_NBR_NEG]
+        ent.append((f"{NEUTRO_NBR[0]}", NEUTRO_NBR[1]))
+        ent += [(f"{v}", c) for v, c in STOPS_NBR_POS]
+        ent.append(("1.0", STOPS_NBR_POS[-1][1]))
     else:
         ent = [(f"{v}", c) for v, c in STOPS_MNDWI_TERRA]
         ent.append((f"{NEUTRO_MNDWI[0]}", NEUTRO_MNDWI[1]))

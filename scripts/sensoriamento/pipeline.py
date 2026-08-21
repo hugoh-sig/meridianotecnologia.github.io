@@ -191,7 +191,7 @@ def baixar_camada(ee, imagem, bandas, epsg, x0, y0, largura, altura, destino, dt
         "nodata": nodata,
         "compress": "deflate",
         "tiled": True,
-        "predictor": 2 if dtype == "uint8" else 3,
+        "predictor": 3 if str(dtype).startswith("float") else 2,
     }
     with rasterio.open(destino, "w", **perfil) as dst:
         dst.write(mosaico)
