@@ -4,116 +4,223 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meridiano Tecnologia</title>
-<meta name="description" content="Trabalho com dado geoespacial de ponta a ponta: coleta em campo, tratamento, análise e publicação.">
+<meta name="description" content="A Meridiano transforma dado em informação e conhecimento, do campo ao resultado. Sensoriamento remoto, diagnóstico socioterritorial, coleta em campo e infraestrutura de dado.">
 <meta property="og:title" content="Meridiano Tecnologia">
-<meta property="og:description" content="Ferramentas para quem coleta e analisa dado territorial. Coleta em campo, tratamento, análise e publicação.">
+<meta property="og:description" content="A Meridiano transforma dado em informação e conhecimento, do campo ao resultado.">
 <meta property="og:image" content="https://meridianotecnologia.com.br/assets/img/og.png">
 <meta property="og:url" content="https://meridianotecnologia.com.br/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Meridiano Tecnologia">
-<meta name="twitter:description" content="Ferramentas para quem coleta e analisa dado territorial. Coleta em campo, tratamento, análise e publicação.">
+<meta name="twitter:description" content="A Meridiano transforma dado em informação e conhecimento, do campo ao resultado.">
 <meta name="twitter:image" content="https://meridianotecnologia.com.br/assets/img/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
 <style>
-/* Home visual: abertura em imagem, texto na coluna de 680px */
-main { max-width: none; padding-inline: 0; }
-main .col { max-width: 680px; margin-inline: auto; padding-inline: 24px; }
+/* Home: abertura em tela inteira, coluna de texto de 680px, ritmo assimétrico */
+main { max-width: none; padding-inline: 0; padding-bottom: 0; }
+.col { max-width: 680px; margin-inline: auto; padding-inline: 24px; }
 
-.abertura { position: relative; min-height: 84vh; min-height: 88svh; display: flex; align-items: flex-end; background: #14211c; margin-top: 24px; }
-.abertura > picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pular {
+  position: absolute; left: -9999px; z-index: 3;
+  background: #fafafa; color: #1B4D3E; padding: 8px 16px;
+}
+.pular:focus { left: 8px; top: 8px; }
+
+/* Cabeçalho sobreposto à abertura */
+header {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  max-width: none; padding: 24px 24px 0;
+}
+.marca, header nav a { color: #fafafa; }
+header a:focus-visible { outline-color: #fafafa; }
+header nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* Abertura: a tela inteira */
+.abertura { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: flex-end; background: #14211c; }
+.abertura picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.abertura::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 160px;
+  background: linear-gradient(to bottom, rgba(8, 18, 14, 0.72), rgba(8, 18, 14, 0));
+}
 .abertura-texto {
   position: relative; width: 100%;
-  background: linear-gradient(to top, rgba(8, 18, 14, 0.88) 0%, rgba(8, 18, 14, 0.62) 55%, rgba(8, 18, 14, 0) 100%);
-  padding-top: 112px;
+  background: linear-gradient(to top, rgba(8, 18, 14, 0.9) 0%, rgba(8, 18, 14, 0.62) 55%, rgba(8, 18, 14, 0) 100%);
+  padding-top: 128px;
 }
-.abertura-texto .col { padding-bottom: 40px; }
-.abertura h1 { color: #fafafa; margin-top: 0; }
+.abertura-texto .col { padding-bottom: 48px; }
+.abertura h1 { color: #fafafa; margin-top: 0; font-size: clamp(30px, 4.5vw, 42px); max-width: 17em; }
+.abertura-texto p { color: rgba(250, 250, 250, 0.92); max-width: 34em; margin-top: 16px; }
 
-.competencias { list-style: none; }
-.competencias li { margin-top: 40px; }
-.competencias h2 { margin-top: 0; }
-.competencias li:first-child h2 { font-size: 26px; }
-.competencias p { margin-top: 8px; }
+/* Hover discreto nos links do corpo */
+main a:hover, footer a:hover { color: #14382d; text-decoration-thickness: 2px; }
 
-.trabalho { margin-top: 40px; }
-.trabalho picture img { display: block; width: 100%; height: auto; }
-.trabalho h3 { color: #1B4D3E; font-size: 17px; font-weight: 700; margin-top: 16px; }
+/* Capacidades: coluna estreita, sensoriamento em corpo maior */
+.capacidades { margin-top: 96px; }
+.capacidades ul { list-style: none; }
+.capacidades li { margin-top: 48px; }
+.capacidades h3 { color: #1B4D3E; font-size: 18px; line-height: 1.35; }
+.capacidades p { margin-top: 8px; }
+.capacidades li.principal h3 { font-size: 23px; }
+.capacidades li.principal p { font-size: 19px; }
 
-.destaque { font-size: 21px; font-weight: 700; line-height: 1.35; color: #1B4D3E; margin-top: 64px; }
+/* Imagem plena: rompe a coluna, sem título nem legenda */
+.plena { margin-top: 120px; }
+.plena img { display: block; width: 100%; height: auto; }
+
+/* Publicação: o momento de silêncio */
+.publicacao { padding-top: 128px; padding-bottom: 128px; text-align: center; }
+.publicacao .col { max-width: 620px; }
+.publicacao h2 { margin-top: 0; font-size: 17px; font-weight: 500; color: #111816; letter-spacing: 0.02em; }
+.publicacao .frase { font-size: clamp(24px, 3.5vw, 30px); font-weight: 700; line-height: 1.3; color: #1B4D3E; margin-top: 24px; }
+.publicacao .apoio { margin-top: 24px; max-width: 30em; margin-inline: auto; }
+
+/* Repertório: volta à coluna estreita */
+.repertorio { margin-top: 0; }
+.repertorio h2 { margin-top: 0; }
+.repertorio picture img { display: block; width: 100%; height: auto; margin-top: 32px; }
+.repertorio .item { margin-top: 48px; }
+.repertorio h3 { color: #1B4D3E; font-size: 18px; line-height: 1.35; }
+.repertorio .item p { margin-top: 8px; }
+
+/* Método: numeração discreta, sem cartão e sem ícone */
+.metodo { margin-top: 112px; }
+.metodo picture img { display: block; width: 100%; height: auto; margin-top: 32px; }
+.metodo ol { list-style: none; counter-reset: passo; margin-top: 16px; }
+.metodo li { counter-increment: passo; margin-top: 40px; }
+.metodo li::before {
+  content: counter(passo, decimal-leading-zero);
+  display: block; color: #1B4D3E; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.12em; margin-bottom: 4px;
+}
+.metodo li strong { color: #1B4D3E; }
+
+/* Responsável técnico e contato fecham em coluna estreita */
+.responsavel { margin-top: 96px; }
+.contato { margin-top: 72px; }
+.contato .canais { margin-top: 16px; }
+
+footer { margin-top: 96px; }
 </style>
 </head>
 <body>
+<a class="pular" href="#capacidades">Pular para o conteúdo</a>
 <header>
   <a class="marca" href="/">
     <svg viewBox="-60 -60 120 120" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><circle cx="0" cy="0" r="50"/><path d="M0,-50 A28,50 0 0,0 0,50"/><path d="M0,-50 L0,50"/><path d="M0,0 L34,-34"/><path d="M0,0 L48,0"/><path d="M0,0 L34,34"/></g><g fill="currentColor"><circle cx="34" cy="-34" r="6"/><circle cx="48" cy="0" r="8"/><circle cx="34" cy="34" r="6"/><circle cx="0" cy="0" r="9"/></g></svg>
     <span>MERIDIANO TECNOLOGIA</span>
   </a>
   <nav aria-label="Principal">
-    <a href="/trabalhos.html">Trabalhos</a>
-    <a href="/metodo.html">Método</a>
-    <a href="/sobre.html">Sobre</a>
+    <a href="#capacidades">Capacidades</a>
+    <a href="#repertorio">Repertório</a>
+    <a href="#metodo">Método</a>
+    <a href="#contato">Contato</a>
   </nav>
 </header>
 <main>
   <section class="abertura">
     <picture>
-      <source type="image/avif" sizes="100vw" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.avif 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.avif 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.avif 1600w">
-      <img src="/sensoriamento/img/foz-sao-francisco_cor_1000.webp" sizes="100vw" srcset="/sensoriamento/img/foz-sao-francisco_cor_600.webp 600w, /sensoriamento/img/foz-sao-francisco_cor_1000.webp 1000w, /sensoriamento/img/foz-sao-francisco_cor_1600.webp 1600w" width="1600" height="1595" fetchpriority="high" alt="Composição Sentinel-2 em cor verdadeira da foz do rio São Francisco: o rio desce do noroeste, a pluma de sedimentos entra no oceano e as dunas claras acompanham a costa">
+      <source type="image/avif" sizes="100vw" srcset="/assets/img/cenas/foz-sao-francisco_falsa-cor_600.avif 600w, /assets/img/cenas/foz-sao-francisco_falsa-cor_1000.avif 1000w, /assets/img/cenas/foz-sao-francisco_falsa-cor_1600.avif 1600w">
+      <img src="/assets/img/cenas/foz-sao-francisco_falsa-cor_1000.webp" sizes="100vw" srcset="/assets/img/cenas/foz-sao-francisco_falsa-cor_600.webp 600w, /assets/img/cenas/foz-sao-francisco_falsa-cor_1000.webp 1000w, /assets/img/cenas/foz-sao-francisco_falsa-cor_1600.webp 1600w" width="1600" height="1595" fetchpriority="high" alt="Composição Sentinel-2 em falsa cor infravermelha (bandas B8, B4 e B3) da foz do rio São Francisco: a vegetação aparece em vermelho, o rio desce escuro até o delta e o oceano ocupa metade da cena">
     </picture>
     <div class="abertura-texto">
       <div class="col">
-        <h1>Ferramentas para quem coleta e analisa dado territorial</h1>
+        <h1>O território para além do que está no mapa: é o que acontece nele.</h1>
+        <p>A Meridiano transforma dado em informação e conhecimento, do campo ao resultado.</p>
       </div>
     </div>
   </section>
 
-  <div class="col">
-    <p>Trabalho com dado geoespacial de ponta a ponta: coleta em campo, tratamento, análise e publicação. Atendo organizações que produzem dado territorial e precisam de ferramentas próprias para isso.</p>
-
-    <ul class="competencias">
-      <li>
-        <h2>Sensoriamento remoto e análise geoespacial</h2>
-        <p>Processamento de séries Sentinel-2 e Landsat, índices espectrais, composições temporais e detecção de mudanças.</p>
-      </li>
-      <li>
-        <h2>Aplicativos de coleta em campo</h2>
-        <p>Registro georreferenciado, funcionamento sem conectividade e exportação em formatos oficiais.</p>
-      </li>
-      <li>
-        <h2>Tratamento e publicação de dado</h2>
-        <p>Estruturação de bases geoespaciais e sistemas web para o resultado chegar a quem precisa dele.</p>
-      </li>
-    </ul>
-
-    <h2>Fonte, método e alcance, sempre declarados.</h2>
-
-    <div class="trabalho">
-      <a href="/sensoriamento/">
-        <picture>
-          <source type="image/avif" media="(max-width: 728px)" srcset="/sensoriamento/img/tres-marias_cor_600.avif">
-          <source type="image/avif" sizes="680px" srcset="/sensoriamento/img/tres-marias_cor_1000.avif 1000w, /sensoriamento/img/tres-marias_cor_1600.avif 1600w">
-          <source type="image/webp" media="(max-width: 728px)" srcset="/sensoriamento/img/tres-marias_cor_600.webp">
-          <img src="/sensoriamento/img/tres-marias_cor_1000.webp" sizes="680px" srcset="/sensoriamento/img/tres-marias_cor_1000.webp 1000w, /sensoriamento/img/tres-marias_cor_1600.webp 1600w" width="1600" height="1588" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira do reservatório de Três Marias: a água escura em braços dendríticos entre o cerrado seco e os pivôs de irrigação">
-        </picture>
-      </a>
-      <h3><a href="/sensoriamento/">Quatro cenas, um pipeline</a></h3>
-      <p class="artefato-desc">72 imagens Sentinel-2, quatro geografias, o mesmo script.</p>
+  <section class="capacidades" id="capacidades">
+    <div class="col">
+      <h2>O que a Meridiano faz</h2>
+      <ul>
+        <li class="principal">
+          <h3>Sensoriamento remoto e geoprocessamento</h3>
+          <p>Processamento de séries históricas de satélite em nuvem, composições temporais, índices espectrais e detecção de mudança. Análise espacial vetorial e matricial, modelagem de terreno e cartografia temática. Imagens e camadas tratadas para responder perguntas específicas.</p>
+        </li>
+        <li>
+          <h3>Diagnóstico socioterritorial</h3>
+          <p>Integração de bases ambientais, fundiárias e socioeconômicas em análise que caracteriza o território e revela suas particularidades.</p>
+        </li>
+        <li>
+          <h3>Sistemas de coleta em campo</h3>
+          <p>Aplicativos que funcionam sem conectividade, com registro georreferenciado, regras de consistência e exportação em múltiplos formatos.</p>
+        </li>
+        <li>
+          <h3>Infraestrutura de dado</h3>
+          <p>Fluxos operacionais reprodutíveis, bases documentadas e produtos digitais que preservam procedência.</p>
+        </li>
+      </ul>
     </div>
+  </section>
 
-    <div class="trabalho">
-      <!-- Imagem de prévia do mapa entrará aqui, acima do título do artefato. -->
-      <h3><a href="/acesso-saude-bh/">Mapa de acesso à saúde, Belo Horizonte</a></h3>
-      <p class="artefato-desc">5.166 setores censitários, 155 unidades de saúde, distância medida pela rede de ruas.</p>
-    </div>
-
-    <p>Venho da engenharia florestal e da análise e modelagem de sistemas ambientais. Essa formação me deixou atento à origem do dado e ao que ele sustenta.</p>
-    <p class="apoio"><a href="/sobre.html">Sobre mim</a></p>
-
-    <p class="destaque">Fale comigo pelo <a href="https://wa.me/5531975097001">WhatsApp</a> ou por <a href="mailto:hugo@meridianotecnologia.com.br">e-mail</a>.</p>
+  <div class="plena">
+    <picture>
+      <source type="image/avif" sizes="100vw" srcset="/assets/img/cenas/tres-marias_swir_600.avif 600w, /assets/img/cenas/tres-marias_swir_1000.avif 1000w, /assets/img/cenas/tres-marias_swir_1600.avif 1600w">
+      <img src="/assets/img/cenas/tres-marias_swir_1000.webp" sizes="100vw" srcset="/assets/img/cenas/tres-marias_swir_600.webp 600w, /assets/img/cenas/tres-marias_swir_1000.webp 1000w, /assets/img/cenas/tres-marias_swir_1600.webp 1600w" width="1600" height="1588" loading="lazy" alt="Composição Sentinel-2 SWIR (bandas B12, B8A e B4) do reservatório de Três Marias: a água em preto, a vegetação em verde vivo e o solo exposto do cerrado seco em tons claros">
+    </picture>
   </div>
+
+  <section class="publicacao">
+    <div class="col">
+      <h2>Capacidade de publicação com procedência</h2>
+      <p class="frase">Fonte, método e alcance, sempre declarados.</p>
+      <p class="apoio">A Meridiano produz material com padrão rigoroso: fonte, método explícito, limitações declaradas e resultado reproduzível.</p>
+    </div>
+  </section>
+
+  <section class="repertorio" id="repertorio">
+    <div class="col">
+      <h2>Repertório</h2>
+      <picture>
+        <source type="image/avif" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.avif 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.avif 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.avif 1600w">
+        <img src="/assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.webp 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.webp 1600w" width="1600" height="1602" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira (bandas B4, B3 e B2) da região da Barragem de Salinas, norte de Minas: o reservatório escuro no centro de um mosaico de pastagens, solo exposto e manchas de vegetação">
+      </picture>
+      <div class="item">
+        <h3>Diagnóstico socioterritorial para processo participativo municipal</h3>
+        <p>Fluxo de trabalho reprodutível consolidando variáveis sociais e ambientais, com estimativa populacional documentada em premissas e limitações.</p>
+      </div>
+      <div class="item">
+        <h3>Coleta georreferenciada para pesquisa socioambiental</h3>
+        <p>Aplicativos nativos e progressivos com arquitetura offline e online, gestão amostral remota e fila de sincronização.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="metodo" id="metodo">
+    <div class="col">
+      <h2>Método</h2>
+      <picture>
+        <source type="image/avif" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.avif 600w, /assets/img/cenas/fortaleza_ndvi_1000.avif 1000w, /assets/img/cenas/fortaleza_ndvi_1600.avif 1600w">
+        <img src="/assets/img/cenas/fortaleza_ndvi_1000.webp" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.webp 600w, /assets/img/cenas/fortaleza_ndvi_1000.webp 1000w, /assets/img/cenas/fortaleza_ndvi_1600.webp 1600w" width="1600" height="1593" loading="lazy" alt="Índice de vegetação NDVI de Fortaleza, calculado de composição Sentinel-2: a malha urbana em tons claros, as matas e parques em verde escuro e o oceano em cinza neutro">
+      </picture>
+      <ol>
+        <li><strong>Entendimento da demanda.</strong> Antes de escolher ferramenta, entender que decisão o dado precisa apoiar. Escopo, escala e fontes disponíveis definem o contexto de trabalho.</li>
+        <li><strong>Estruturação do trabalho.</strong> Fonte, método e limitações definidos antes do primeiro cálculo.</li>
+        <li><strong>Consolidação no contexto.</strong> Análise e sistema validados em diferentes condições de uso.</li>
+        <li><strong>Entrega.</strong> Dado tratado, o processo que o gerou e a documentação que o descreve.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="responsavel">
+    <div class="col">
+      <h2>Responsável técnico</h2>
+      <p><strong>Hugo Salis</strong></p>
+      <p>Engenheiro florestal, mestre em Análise e Modelagem de Sistemas Ambientais pela UFMG, com especialização em Arquitetura e Estratégia de Dados pela PUC Minas.</p>
+      <p>Trajetória em geoprocessamento e sensoriamento remoto aplicados a bacias hidrográficas, planejamento territorial e monitoramento ambiental.</p>
+    </div>
+  </section>
+
+  <section class="contato" id="contato">
+    <div class="col">
+      <h2>Contato</h2>
+      <p>Estamos abertos para conversar sobre a sua demanda. Descreva o contexto e a decisão que o dado precisa apoiar.</p>
+      <p class="canais"><a href="https://wa.me/5531975097001">WhatsApp (31) 9 7509-7001</a> · <a href="mailto:hugo@meridianotecnologia.com.br">hugo@meridianotecnologia.com.br</a></p>
+    </div>
+  </section>
 </main>
 <footer>
   <p>Meridiano Tecnologia · Belo Horizonte, MG · 2026</p>
