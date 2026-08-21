@@ -65,43 +65,89 @@ main a:hover, footer a:hover { color: #14382d; text-decoration-thickness: 2px; }
 .capacidades li.principal h3 { font-size: 23px; }
 .capacidades li.principal p { font-size: 19px; }
 
-/* Imagem plena: rompe a coluna, sem título nem legenda */
-.plena { margin-top: 120px; }
+/* Imagens plenas: toda imagem de cena ocupa 100vw; ficha mínima da cena
+   sobreposta na margem inferior esquerda (aria-hidden: duplica o alt) */
+html { overflow-x: clip; overflow-y: auto; }
+.plena { position: relative; }
 .plena img { display: block; width: 100%; height: auto; }
+.plena-solo { margin-top: 120px; }
+.repertorio .plena, .metodo .plena { margin-top: 32px; }
+.ficha {
+  display: none;
+  position: absolute; left: 24px; bottom: 14px; margin: 0;
+  font-size: 12px; line-height: 1.4; letter-spacing: 0.18em;
+  color: rgba(250, 250, 250, 0.6);
+  text-shadow: 0 1px 4px rgba(17, 24, 22, 0.45);
+}
+.ficha-escura { color: rgba(17, 24, 22, 0.6); text-shadow: none; }
 
-/* Publicação: o momento de silêncio */
-.publicacao { padding-top: 128px; padding-bottom: 128px; text-align: center; }
+/* Publicação: o momento de silêncio, agora em fundo invertido */
+.publicacao { padding-top: 128px; padding-bottom: 128px; text-align: center; background: #111816; color: #fafafa; }
 .publicacao .col { max-width: 620px; }
-.publicacao h2 { margin-top: 0; font-size: 17px; font-weight: 500; color: #111816; letter-spacing: 0.02em; }
-.publicacao .frase { font-size: clamp(24px, 3.5vw, 30px); font-weight: 700; line-height: 1.3; color: #1B4D3E; margin-top: 24px; }
+.publicacao h2 { margin-top: 0; font-size: 17px; font-weight: 500; color: #fafafa; letter-spacing: 0.02em; }
+.publicacao .frase { font-size: clamp(24px, 3.5vw, 30px); font-weight: 700; line-height: 1.3; color: #7fd3ae; margin-top: 24px; }
 .publicacao .apoio { margin-top: 24px; max-width: 30em; margin-inline: auto; }
 
 /* Repertório: volta à coluna estreita */
-.repertorio { margin-top: 0; }
+.repertorio { margin-top: 96px; }
 .repertorio h2 { margin-top: 0; }
-.repertorio picture img { display: block; width: 100%; height: auto; margin-top: 32px; }
 .repertorio .item { margin-top: 48px; }
 .repertorio h3 { color: #1B4D3E; font-size: 18px; line-height: 1.35; }
 .repertorio .item p { margin-top: 8px; }
 
 /* Método: numeração discreta, sem cartão e sem ícone */
 .metodo { margin-top: 112px; }
-.metodo picture img { display: block; width: 100%; height: auto; margin-top: 32px; }
-.metodo ol { list-style: none; counter-reset: passo; margin-top: 16px; }
+.metodo ol { list-style: none; counter-reset: passo; margin-top: 48px; }
 .metodo li { counter-increment: passo; margin-top: 40px; }
 .metodo li::before {
   content: counter(passo, decimal-leading-zero);
+  content: counter(passo, decimal-leading-zero) / "";
   display: block; color: #1B4D3E; font-size: 13px; font-weight: 500;
   letter-spacing: 0.12em; margin-bottom: 4px;
 }
 .metodo li strong { color: #1B4D3E; }
 
-/* Responsável técnico e contato fecham em coluna estreita */
-.responsavel { margin-top: 96px; }
-.contato { margin-top: 72px; }
-.contato .canais { margin-top: 16px; }
+/* Rótulos técnicos das capacidades: só existem visualmente (aria-hidden) */
+.capacidades .rotulo { display: none; }
 
-footer { margin-top: 96px; }
+/* Responsável técnico fecha em coluna estreita; contato em fundo invertido */
+.responsavel { margin-top: 96px; }
+.contato { margin-top: 96px; padding-top: 88px; padding-bottom: 96px; background: #111816; color: #fafafa; }
+.contato h2 { margin-top: 0; color: #7fd3ae; }
+.contato .canais { margin-top: 16px; }
+.contato a { color: #7fd3ae; }
+.contato a:hover { color: #fafafa; text-decoration-thickness: 2px; }
+.contato a:focus-visible { outline-color: #fafafa; }
+
+footer { margin-top: 96px; position: relative; }
+.coordenadas { font-size: 12px; letter-spacing: 0.18em; color: #1B4D3E; }
+
+/* Elementos de margem: só aparecem acima de 1100px; abaixo disso a
+   numeração volta ao fluxo, os rótulos somem e as coordenadas ficam no fluxo */
+@media (min-width: 1100px) {
+  .ficha { display: block; }
+  .metodo li { position: relative; }
+  .metodo li::before {
+    position: absolute; top: 0;
+    left: calc((680px - 100vw) / 2);
+    font-size: 30px; line-height: 1.2; letter-spacing: 0.06em;
+    color: rgba(27, 77, 62, 0.4); margin-bottom: 0;
+  }
+  .capacidades li { position: relative; }
+  .capacidades .rotulo {
+    display: block; position: absolute; top: 0; bottom: 0;
+    right: calc((680px - 100vw) / 2 + 8px);
+    writing-mode: vertical-rl;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.22em;
+    color: rgba(27, 77, 62, 0.45);
+    border-left: 1px solid rgba(27, 77, 62, 0.2);
+    padding-left: 10px;
+  }
+  .coordenadas {
+    position: absolute; top: 32px; margin: 0;
+    left: calc((680px - 100vw) / 2 + 24px);
+  }
+}
 </style>
 </head>
 <body>
@@ -137,18 +183,22 @@ footer { margin-top: 96px; }
       <h2>O que a Meridiano faz</h2>
       <ul>
         <li class="principal">
+          <span class="rotulo" aria-hidden="true">SATÉLITE</span>
           <h3>Sensoriamento remoto e geoprocessamento</h3>
           <p>Processamento de séries históricas de satélite em nuvem, composições temporais, índices espectrais e detecção de mudança. Análise espacial vetorial e matricial, modelagem de terreno e cartografia temática. Imagens e camadas tratadas para responder perguntas específicas.</p>
         </li>
         <li>
+          <span class="rotulo" aria-hidden="true">BASES</span>
           <h3>Diagnóstico socioterritorial</h3>
           <p>Integração de bases ambientais, fundiárias e socioeconômicas em análise que caracteriza o território e revela suas particularidades.</p>
         </li>
         <li>
+          <span class="rotulo" aria-hidden="true">CAMPO</span>
           <h3>Sistemas de coleta em campo</h3>
           <p>Aplicativos que funcionam sem conectividade, com registro georreferenciado, regras de consistência e exportação em múltiplos formatos.</p>
         </li>
         <li>
+          <span class="rotulo" aria-hidden="true">PIPELINE</span>
           <h3>Infraestrutura de dado</h3>
           <p>Fluxos operacionais reprodutíveis, bases documentadas e produtos digitais que preservam procedência.</p>
         </li>
@@ -156,11 +206,12 @@ footer { margin-top: 96px; }
     </div>
   </section>
 
-  <div class="plena">
+  <div class="plena plena-solo">
     <picture>
       <source type="image/avif" sizes="100vw" srcset="/assets/img/cenas/tres-marias_swir_600.avif 600w, /assets/img/cenas/tres-marias_swir_1000.avif 1000w, /assets/img/cenas/tres-marias_swir_1600.avif 1600w">
       <img src="/assets/img/cenas/tres-marias_swir_1000.webp" sizes="100vw" srcset="/assets/img/cenas/tres-marias_swir_600.webp 600w, /assets/img/cenas/tres-marias_swir_1000.webp 1000w, /assets/img/cenas/tres-marias_swir_1600.webp 1600w" width="1600" height="1588" loading="lazy" alt="Composição Sentinel-2 SWIR (bandas B12, B8A e B4) do reservatório de Três Marias: a água em preto, a vegetação em verde vivo e o solo exposto do cerrado seco em tons claros">
     </picture>
+    <p class="ficha" aria-hidden="true">TRÊS MARIAS · SWIR B12 B8A B4 · SENTINEL-2</p>
   </div>
 
   <section class="publicacao">
@@ -174,10 +225,15 @@ footer { margin-top: 96px; }
   <section class="repertorio" id="repertorio">
     <div class="col">
       <h2>Repertório</h2>
+    </div>
+    <div class="plena">
       <picture>
-        <source type="image/avif" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.avif 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.avif 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.avif 1600w">
-        <img src="/assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.webp 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.webp 1600w" width="1600" height="1602" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira (bandas B4, B3 e B2) da região da Barragem de Salinas, norte de Minas: o reservatório escuro no centro de um mosaico de pastagens, solo exposto e manchas de vegetação">
+        <source type="image/avif" sizes="100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.avif 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.avif 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.avif 1600w">
+        <img src="/assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp" sizes="100vw" srcset="/assets/img/cenas/barragem-salinas_cor-verdadeira_600.webp 600w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1000.webp 1000w, /assets/img/cenas/barragem-salinas_cor-verdadeira_1600.webp 1600w" width="1600" height="1602" loading="lazy" alt="Composição Sentinel-2 em cor verdadeira (bandas B4, B3 e B2) da região da Barragem de Salinas, norte de Minas: o reservatório escuro no centro de um mosaico de pastagens, solo exposto e manchas de vegetação">
       </picture>
+      <p class="ficha" aria-hidden="true">BARRAGEM DE SALINAS · COR VERDADEIRA B4 B3 B2 · SENTINEL-2</p>
+    </div>
+    <div class="col">
       <div class="item">
         <h3>Diagnóstico socioterritorial para processo participativo municipal</h3>
         <p>Fluxo de trabalho reprodutível consolidando variáveis sociais e ambientais, com estimativa populacional documentada em premissas e limitações.</p>
@@ -192,10 +248,15 @@ footer { margin-top: 96px; }
   <section class="metodo" id="metodo">
     <div class="col">
       <h2>Método</h2>
+    </div>
+    <div class="plena">
       <picture>
-        <source type="image/avif" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.avif 600w, /assets/img/cenas/fortaleza_ndvi_1000.avif 1000w, /assets/img/cenas/fortaleza_ndvi_1600.avif 1600w">
-        <img src="/assets/img/cenas/fortaleza_ndvi_1000.webp" sizes="(min-width: 729px) 680px, 100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.webp 600w, /assets/img/cenas/fortaleza_ndvi_1000.webp 1000w, /assets/img/cenas/fortaleza_ndvi_1600.webp 1600w" width="1600" height="1593" loading="lazy" alt="Índice de vegetação NDVI de Fortaleza, calculado de composição Sentinel-2: a malha urbana em tons claros, as matas e parques em verde escuro e o oceano em cinza neutro">
+        <source type="image/avif" sizes="100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.avif 600w, /assets/img/cenas/fortaleza_ndvi_1000.avif 1000w, /assets/img/cenas/fortaleza_ndvi_1600.avif 1600w">
+        <img src="/assets/img/cenas/fortaleza_ndvi_1000.webp" sizes="100vw" srcset="/assets/img/cenas/fortaleza_ndvi_600.webp 600w, /assets/img/cenas/fortaleza_ndvi_1000.webp 1000w, /assets/img/cenas/fortaleza_ndvi_1600.webp 1600w" width="1600" height="1593" loading="lazy" alt="Índice de vegetação NDVI de Fortaleza, calculado de composição Sentinel-2: a malha urbana em tons claros, as matas e parques em verde escuro e o oceano em cinza neutro">
       </picture>
+      <p class="ficha ficha-escura" aria-hidden="true">FORTALEZA · NDVI B8 B4 · SENTINEL-2</p>
+    </div>
+    <div class="col">
       <ol>
         <li><strong>Entendimento da demanda.</strong> Antes de escolher ferramenta, entender que decisão o dado precisa apoiar. Escopo, escala e fontes disponíveis definem o contexto de trabalho.</li>
         <li><strong>Estruturação do trabalho.</strong> Fonte, método e limitações definidos antes do primeiro cálculo.</li>
@@ -223,6 +284,7 @@ footer { margin-top: 96px; }
   </section>
 </main>
 <footer>
+  <p class="coordenadas">19°55′S 43°56′W</p>
   <p>Meridiano Tecnologia · Belo Horizonte, MG · 2026</p>
   <p><a href="https://wa.me/5531975097001">WhatsApp (31) 9 7509-7001</a> · <a href="mailto:hugo@meridianotecnologia.com.br">hugo@meridianotecnologia.com.br</a></p>
   <p><a href="/privacidade.html">Privacidade</a></p>
